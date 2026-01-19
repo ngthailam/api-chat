@@ -5,6 +5,9 @@ import { UserModule } from './user/user.module';
 import { ChatModule } from './chat/chat.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guard/jwt.guard';
 
 @Module({
   imports: [
@@ -16,12 +19,19 @@ import { User } from './user/entities/user.entity';
       password: '', // if you haven’t set one
       database: 'api_chat',
       entities: [User],
-      synchronize: true,
+      synchronize: true, // TODO: remove on Prod
     }),
     UserModule,
     ChatModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

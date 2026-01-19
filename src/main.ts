@@ -10,13 +10,17 @@ async function bootstrap() {
     .setTitle('Backend Playground API')
     .setDescription('Swagger API documentation for Backend Playground')
     .setVersion('1.0')
+    .addBearerAuth()
+    .addSecurityRequirements('bearer')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
 
   // Enable CORS for Flutter web development
   app.enableCors({

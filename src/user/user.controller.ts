@@ -1,33 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from './dto/user.dto';
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll() {
+    const userEntites = await this.userService.findAll();
+    return userEntites.map((user) => UserDto.fromEntity(user));
   }
 
-  @Get('name/:name')
-  findByName(@Param('name') name: string) {
-    return this.userService.findByName(name);
+  @Get('by-email/:email')
+  async findByEmail(@Param('email') email: string) {
+    const userEntity = await this.userService.findByEmail(email);
+    return UserDto.fromEntity(userEntity);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const userEntity = await this.userService.findOne(id);
+    return UserDto.fromEntity(userEntity);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
   }
 }
