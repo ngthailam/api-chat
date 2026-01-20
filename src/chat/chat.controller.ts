@@ -10,10 +10,8 @@ import {
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
 import { CurrentUser } from 'src/common/decorator/current-user.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -22,8 +20,7 @@ export class ChatController {
 
   @Post()
   create(@CurrentUser() user: any, @Body() createChatDto: CreateChatDto) {
-    console.log(user.sub);
-    return this.chatService.create(createChatDto);
+    return this.chatService.create(user.userId, createChatDto);
   }
 
   @Get()
@@ -33,26 +30,43 @@ export class ChatController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.chatService.findOne(+id);
+    return this.chatService.findOne(id);
   }
 
-  @Post('members/add')
-  addMembers(@Param('id') id: string, @Body() memberIds: string[]) {
-    return this.chatService.addMembers(+id, memberIds);
+  @Post(':id/members')
+  @ApiBody({
+    schema: {
+      properties: { memberIds: { type: 'array', items: { type: 'string' } } },
+    },
+  })
+  addMembers(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body('memberIds') memberIds: string[],
+  ) {
+    return this.chatService.addMembers(user.userId, id, memberIds);
   }
 
-  @Post('members/delete')
-  removeMember(@Param('id') id: string, @Body() memberId: string) {
-    return this.chatService.removeMember(+id, memberId);
+  @Delete(':id/members/:memberId')
+  removeMember(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.chatService.removeMember(user.userId, id, memberId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
-    return this.chatService.update(+id, updateChatDto);
+  @Patch(':id/rename')
+  renameChat(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body('newName') newName: string,
+  ) {
+    return this.chatService.renameChat(user.userId, id, newName);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatService.remove(+id);
+  remove(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.chatService.remove(user.userId, id);
   }
 }

@@ -18,7 +18,7 @@ import { JwtAuthGuard } from './common/guard/jwt.guard';
       username: 'lam',
       password: '', // if you haven’t set one
       database: 'api_chat',
-      entities: [User],
+      autoLoadEntities: true,
       synchronize: true, // TODO: remove on Prod
     }),
     UserModule,

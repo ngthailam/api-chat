@@ -16,7 +16,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest<TUser = any>(err: any, user: any, info: any, context: ExecutionContext, status?: any): TUser {
-      console.log(`JwtAuthGuard: handleRequest called with user: ${err} - ${info} - ${status} ${JSON.stringify(user)}`);
       return super.handleRequest(err, user, info, context, status);
   }
 
