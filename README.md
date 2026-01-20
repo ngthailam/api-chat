@@ -18,16 +18,30 @@ An backend API for a chat system.
 
 `brew services start postgresql@15`
 
-# Todo
+# TODOs
 
 ## Core
-[] User management
-[] Authentication
-[] API Chat
-[] Support realtime 1-1 Chat
-[] Support realtime room chat
+[x] User management
+[x] Authentication
+[x] API Chat CRUD
+[] Send messages (real time)
+[] Firebase push notification integration
 
 ## Ehance
+
+[] Compression
+[] Caching (cache search/get users ? cache chat rooms ?)
+[] Security (Helmet, CORS, CRSF, https://docs.nestjs.com/security/csrf)
+[] Performance (Fastify ?)
+[] Race condition handling
+[] Task scheduling (try accesing the database and/or notification)
+[] Full text Search in chat ?
+[] Add paging to some APIs (get user by name, get chats, get messages in chat)
+[] Mute notification
+[] Online status (Redis)
 [] Reaction
 [] Quote
+[] Add version control (v1 v2 ?)
+[] CI/CD Auto deploy/host somewhere
 [] Send photos
+
