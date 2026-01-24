@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -18,8 +18,21 @@ export class UserService {
     return this.repo.findOneBy({ id });
   }
 
-  findByEmail(email: string) {
-    return this.repo.findOneBy({ email });
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.repo.findOne({
+      where: {
+        email: ILike(`%${email}%`),
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        `Cannot find user with email ${email}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return user;
   }
 
   remove(id: string) {

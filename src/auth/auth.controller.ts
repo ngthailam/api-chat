@@ -26,7 +26,6 @@ export class AuthController {
   @Post('refresh')
   @ApiBearerAuth()
   refreshToken(@CurrentUser() user) {
-    console.log(user);
     return this.authService.refreshToken(user.sub);
   }
 }

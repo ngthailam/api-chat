@@ -2,17 +2,20 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Chat } from './entities/chat.entity';
 import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatMember } from './entities/chat-member';
 import { ChatDto } from './dto/chat.dto';
 import { ChatMemberDto } from './dto/chat-member.dto';
+import { Message } from 'src/message/entities/message.entity';
+import { ChatType } from './dto/chat-type';
 
 @Injectable()
 export class ChatService {
@@ -23,20 +26,48 @@ export class ChatService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(ChatMember)
     private readonly chatMemberRepo: Repository<ChatMember>,
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
   ) {}
 
-  async create(userId: string, createChatDto: CreateChatDto) {
-    const chat = this.chatRepo.create();
-    const savedChat = await this.chatRepo.save(chat);
+  private readonly logger = new Logger(ChatService.name);
 
-    createChatDto.memberIds = createChatDto.memberIds || [];
-    if (!createChatDto.memberIds.includes(userId)) {
-      createChatDto.memberIds.push(userId);
+  async create(userId: string, createChatDto: CreateChatDto) {
+    if (createChatDto.type == ChatType.ONE_ONE) {
+      if (createChatDto.memberIds.length != 1) {
+        throw new HttpException(
+          `One to one chat should contains exactly 1 other memberId`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const existingChat = await this.findExistingOneToOneChat(
+        userId,
+        createChatDto.memberIds.at(0),
+      );
+      if (existingChat) {
+        this.logger.log(`Chat already exist ${existingChat}`);
+        return existingChat;
+      }
+    }
+
+    const chat = this.chatRepo.create();
+    if (createChatDto.type != ChatType.ONE_ONE) {
+      chat.name = createChatDto.name;
+    }
+    const savedChat = await this.chatRepo.save(chat);
+    const membersToAdd = createChatDto.memberIds || [];
+    if (!membersToAdd.includes(userId)) {
+      membersToAdd.push(userId);
     }
 
     const members = await this.userRepo.find({
       where: { id: In(createChatDto.memberIds) },
     });
+
+    this.logger.log(
+      `Creating a new chat with members = ${members.map((e) => e.id)}`,
+    );
 
     const chatMembers = members.map((member) => {
       const chatMember = new ChatMember();
@@ -48,8 +79,36 @@ export class ChatService {
 
     await this.chatMemberRepo.save(chatMembers);
 
-    const chatDto = ChatDto.fromEntity(savedChat, chatMembers);
     return ChatDto.fromEntity(savedChat, chatMembers);
+  }
+
+  async findExistingOneToOneChat(
+    userAId: string,
+    userBId: string,
+  ): Promise<Chat | null> {
+    const chatMembers = await this.chatMemberRepo.find({
+      where: { member: { id: userAId } },
+      relations: ['member', 'chat'],
+    });
+
+    let targetChat: Chat | null = null;
+
+    chatMembers.forEach(async (e) => {
+      const chatId = e.chat.id;
+
+      if (e.chat.type == ChatType.ONE_ONE) {
+        const otherChatMember = await this.chatMemberRepo.findOne({
+          where: { chat: { id: chatId }, member: { id: Not(userAId) } },
+        });
+
+        if (otherChatMember.member.id == userBId) {
+          targetChat = e.chat;
+          return targetChat;
+        }
+      }
+    });
+
+    return targetChat;
   }
 
   async findAll() {
@@ -90,13 +149,10 @@ export class ChatService {
       where: { id: In(memberIds) },
     });
 
-    const userInMembers = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: currentUserId },
-      },
-      relations: ['chat', 'member'],
-    });
+    const userInMembers = await this.getMemberInChat(chatId, currentUserId, [
+      'member',
+      'chat',
+    ]);
 
     if (!userInMembers) {
       throw new HttpException(
@@ -144,13 +200,11 @@ export class ChatService {
       );
     }
 
-    const requestingUserChatMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: currentUserId },
-      },
-      relations: ['chat', 'member'],
-    });
+    const requestingUserChatMember = await this.getMemberInChat(
+      chatId,
+      currentUserId,
+      ['member', 'chat'],
+    );
 
     if (!requestingUserChatMember) {
       throw new HttpException(
@@ -173,7 +227,6 @@ export class ChatService {
   }
 
   async renameChat(currentUserId: string, id: string, newName: string) {
-    const chat = await this.chatRepo.findOne({ where: { id: id } });
     const chatMembers = await this.chatMemberRepo.find({
       where: {
         chat: { id: id },
@@ -192,14 +245,9 @@ export class ChatService {
   }
 
   async remove(currentUserId: string, id: string) {
-    const chat = await this.chatRepo.findOne({ where: { id: id } });
-    const currentUserMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: id },
-        member: { id: currentUserId },
-      },
-      relations: ['member'],
-    });
+    const currentUserMember = await this.getMemberInChat(id, currentUserId, [
+      'member',
+    ]);
 
     if (!currentUserMember) {
       throw new HttpException(
@@ -213,5 +261,48 @@ export class ChatService {
     }
 
     return this.chatRepo.delete({ id });
+  }
+
+  async removeAll() {
+    return this.chatRepo.deleteAll();
+  }
+
+  async getMemberInChat(
+    chatId: string,
+    memberId: string,
+    relations: string[] = ['member', 'chat'],
+  ): Promise<ChatMember | null> {
+    const chatMember = await this.chatMemberRepo.findOne({
+      where: {
+        chat: { id: chatId },
+        member: { id: memberId },
+      },
+      relations: relations,
+    });
+
+    return chatMember;
+  }
+
+  async createMessage(
+    chatId: string,
+    senderId: string,
+    text: string,
+  ): Promise<Message> {
+    const chatMember = this.getMemberInChat(chatId, senderId);
+
+    if (!chatMember) {
+      throw new HttpException(
+        'User is not a member of the chat',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const message = this.messageRepo.create({
+      text,
+      senderId,
+      chatId,
+      createdAt: new Date(),
+    });
+    return this.messageRepo.save(message);
   }
 }

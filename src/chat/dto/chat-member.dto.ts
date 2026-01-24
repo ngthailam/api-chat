@@ -13,7 +13,7 @@ export class ChatMemberDto {
     const chatMemberDto = new ChatMemberDto();
     chatMemberDto.id = cm.member.id;
     chatMemberDto.email = cm.member.email;
-    chatMemberDto.email = cm.nickName;
+    chatMemberDto.nickName = cm.nickName;
     chatMemberDto.role = cm.role;
     return chatMemberDto;
   }

@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ChatType } from '../dto/chat-type';
 
 @Entity()
 export class Chat {
@@ -7,4 +8,7 @@ export class Chat {
 
   @Column({ nullable: true })
   name?: string;
+
+  @Column({ default: ChatType.GROUP })
+  type: ChatType;
 }

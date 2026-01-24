@@ -23,12 +23,7 @@ async function bootstrap() {
   );
 
   // Enable CORS for Flutter web development
-  app.enableCors({
-    origin: ['http://localhost:*', 'http://127.0.0.1:*'], // Allow all localhost ports
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  app.enableCors({ origin: true });
 
   await app.listen(3000);
 }

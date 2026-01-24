@@ -18,13 +18,15 @@ An backend API for a chat system.
 
 `brew services start postgresql@15`
 
+`/Volumes/Transcend/Code/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs`
+
 # TODOs
 
 ## Core
 [x] User management
 [x] Authentication
 [x] API Chat CRUD
-[] Send messages (real time)
+[x] Send messages (real time)
 [] Firebase push notification integration
 
 ## Ehance
