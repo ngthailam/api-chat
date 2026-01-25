@@ -1,7 +1,9 @@
 import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CurrentUser } from 'src/common/decorator/current-user.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Message')
 @Controller('message')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}

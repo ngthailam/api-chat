@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guard/jwt.guard';
 import { MessageModule } from './message/message.module';
+import { FriendRequestModule } from './friend-request/friend-request.module';
+import { FriendModule } from './friend/friend.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { MessageModule } from './message/message.module';
     ChatModule,
     AuthModule,
     MessageModule,
+    FriendRequestModule,
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [

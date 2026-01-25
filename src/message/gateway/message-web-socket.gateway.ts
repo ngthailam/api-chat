@@ -9,11 +9,17 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { HttpException } from '@nestjs/common';
-import { ChatService } from 'src/chat/chat.service';
 import { WsAuthGuard } from 'src/common/guard/ws-auth.guard';
 import { WsCurrentUserDecorator } from 'src/common/decorator/ws-current-user.decorator';
 import { Message } from 'src/message/entities/message.entity';
+import { MessageService } from '../message.service';
 
+/**
+ * Gateway for:
+ * - join chat
+ * - sending messages
+ * - 
+ */
 @WebSocketGateway(81, { namespace: 'message' })
 export class MessageWebSocketGateway {
   @WebSocketServer()
@@ -21,7 +27,7 @@ export class MessageWebSocketGateway {
 
   private logger = new Logger(MessageWebSocketGateway.name);
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly messageService: MessageService) {}
 
   @SubscribeMessage('send-message')
   @UseGuards(WsAuthGuard)
@@ -39,7 +45,7 @@ export class MessageWebSocketGateway {
     }
 
     try {
-      const result: Message = await this.chatService.createMessage(
+      const result: Message = await this.messageService.createMessage(
         chatId,
         senderId,
         text,
@@ -68,7 +74,7 @@ export class MessageWebSocketGateway {
     client.join(chatId);
     client.data.chatId = chatId;
 
-    client.emit('joined-chat', { chatId: chatId });
+    client.emit('join-chat-success', { chatId: chatId });
 
     return;
   }
@@ -88,5 +94,10 @@ export class MessageWebSocketGateway {
     }
 
     client.leave(chatId);
+    client.data.chatId = null;
+
+    client.emit('leave-chat-success', { chatId: chatId });
+
+    return;
   }
 }

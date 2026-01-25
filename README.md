@@ -12,38 +12,29 @@ An backend API for a chat system.
 
 ## Commands
 
-`npm run start`
+### NestJS commands
 
-`npm run start:dev`
+npm run start
+npm run start:dev
 
-`brew services start postgresql@15`
+### System commands
 
-`/Volumes/Transcend/Code/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs`
+brew services start postgresql@15
+brew services start redis
 
-# TODOs
+### Flutter commands
 
-## Core
-[x] User management
-[x] Authentication
-[x] API Chat CRUD
-[x] Send messages (real time)
-[] Firebase push notification integration
+/Volumes/Transcend/Code/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
 
-## Ehance
+### Run specific test
 
-[] Compression
-[] Caching (cache search/get users ? cache chat rooms ?)
-[] Security (Helmet, CORS, CRSF, https://docs.nestjs.com/security/csrf)
-[] Performance (Fastify ?)
-[] Race condition handling
-[] Task scheduling (try accesing the database and/or notification)
-[] Full text Search in chat ?
-[] Add paging to some APIs (get user by name, get chats, get messages in chat)
-[] Mute notification
-[] Online status (Redis)
-[] Reaction
-[] Quote
-[] Add version control (v1 v2 ?)
-[] CI/CD Auto deploy/host somewhere
-[] Send photos
+npm test -- --"friend-request.service.spec.ts" --verbose
 
+### Run all tests:
+
+npm test
+
+### Run tests with coverage:
+
+npm run
+test:cov

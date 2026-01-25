@@ -54,4 +54,33 @@ export class MessageService {
 
     return this.messageRepo.delete(messageId);
   }
+
+  async createMessage(
+    chatId: string,
+    senderId: string,
+    text: string,
+  ): Promise<Message> {
+    const chatMember = await this.chatMemberRepo.findOne({
+      where: {
+        chat: { id: chatId },
+        member: { id: senderId },
+      },
+      relations: ['member'],
+    });
+
+    if (!chatMember) {
+      throw new HttpException(
+        'User is not a member of the chat',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const message = this.messageRepo.create({
+      text,
+      senderId,
+      chatId,
+      createdAt: new Date(),
+    });
+    return this.messageRepo.save(message);
+  }
 }

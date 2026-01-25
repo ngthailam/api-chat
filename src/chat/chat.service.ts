@@ -14,7 +14,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChatMember } from './entities/chat-member';
 import { ChatDto } from './dto/chat.dto';
 import { ChatMemberDto } from './dto/chat-member.dto';
-import { Message } from 'src/message/entities/message.entity';
 import { ChatType } from './dto/chat-type';
 
 @Injectable()
@@ -26,8 +25,6 @@ export class ChatService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(ChatMember)
     private readonly chatMemberRepo: Repository<ChatMember>,
-    @InjectRepository(Message)
-    private readonly messageRepo: Repository<Message>,
   ) {}
 
   private readonly logger = new Logger(ChatService.name);
@@ -281,28 +278,5 @@ export class ChatService {
     });
 
     return chatMember;
-  }
-
-  async createMessage(
-    chatId: string,
-    senderId: string,
-    text: string,
-  ): Promise<Message> {
-    const chatMember = this.getMemberInChat(chatId, senderId);
-
-    if (!chatMember) {
-      throw new HttpException(
-        'User is not a member of the chat',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const message = this.messageRepo.create({
-      text,
-      senderId,
-      chatId,
-      createdAt: new Date(),
-    });
-    return this.messageRepo.save(message);
   }
 }

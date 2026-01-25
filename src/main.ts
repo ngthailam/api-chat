@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap() {
     .addBearerAuth()
     .addSecurityRequirements('bearer')
     .build();
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
@@ -24,6 +26,12 @@ async function bootstrap() {
 
   // Enable CORS for Flutter web development
   app.enableCors({ origin: true });
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // usually off for APIs
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   await app.listen(3000);
 }
