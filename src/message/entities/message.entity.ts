@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ReactionType } from '../model/reaction-type';
 
 @Entity()
 export class Message {
@@ -13,6 +14,9 @@ export class Message {
 
   @Column()
   chatId: string;
+
+  @Column({ type: 'jsonb', default: {} })
+  reactions: Record<string, ReactionType>;
 
   @Column()
   createdAt: Date;

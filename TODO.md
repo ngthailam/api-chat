@@ -11,7 +11,7 @@
 [] Mute notification
 [] Online status (Redis)
 [x] Friends system (Add-Accept-> Only then can allow Chat)
-[] Reaction
+[x] Reaction
 [] Quote
 [] Send photos
 [] Search text in chat
@@ -28,3 +28,7 @@
 [] Add paging to some APIs (get user by name, get chats, get messages in chat)
 [] Add version control (v1 v2 ?)
 [] CI/CD Auto deploy/host somewhere
+
+
+## Bug
+[] Check for double creating one-one chat

@@ -1,10 +1,12 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { ChatMember } from 'src/chat/entities/chat-member';
 import { CustomException } from 'src/common/errors/exception/custom.exception';
 import { CustomErrors } from 'src/common/errors/error_codes';
+import { UpdateMessageDto } from './dto/update-message.dto';
+import { mapMessageModel, MessageModel } from './model/message.model';
 
 @Injectable()
 export class MessageService {
@@ -17,7 +19,11 @@ export class MessageService {
 
   private logger = new Logger(MessageService.name);
 
-  async findAllInChat(userId: any, chatId: string) {
+  async findOne(messageId: number) {
+    return this.messageRepo.findOne({ where: { id: messageId } });
+  }
+
+  async findAllInChat(userId: any, chatId: string): Promise<MessageModel[]> {
     this.logger.log(`findAllInChat for userId = ${userId}, chatId = ${chatId}`);
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
@@ -32,10 +38,12 @@ export class MessageService {
       throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
-    return this.messageRepo.find({
+    const messages = await this.messageRepo.find({
       where: { chatId: chatId },
       order: { createdAt: 'DESC' },
     });
+
+    return messages.map((e) => mapMessageModel(e));
   }
 
   async remove(userId: any, messageId: number) {
@@ -75,5 +83,32 @@ export class MessageService {
       createdAt: new Date(),
     });
     return this.messageRepo.save(message);
+  }
+
+  async update(
+    userId: string,
+    messageId: number,
+    request: UpdateMessageDto,
+  ): Promise<MessageModel | null> {
+    const message = await this.findOne(messageId);
+
+    if (userId != message.senderId) {
+      throw new CustomException(CustomErrors.MSG_NOT_SENDER);
+    }
+
+    // Handle null reaction: remove the user's reaction instead of storing null
+    if (!(request.reaction === undefined)) {
+      const newReactions = { ...message.reactions };
+      if (request.reaction === null) {
+        delete newReactions[userId];
+      } else {
+        newReactions[userId] = request.reaction;
+      }
+
+      message.reactions = newReactions;
+      await this.messageRepo.save(message);
+    }
+
+    return mapMessageModel(message);
   }
 }
