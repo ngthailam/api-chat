@@ -1,15 +1,31 @@
 import { User } from '../entities/user.entity';
+import { UserWithFriendStatusModel } from '../model/user-with-friend-status.model';
 
 export class UserDto {
   id: string;
 
   email: string;
 
-  static fromEntity(user: User): UserDto {
+  isFriend?: boolean;
+
+  static fromEntity(user: User, isFriend: boolean = null): UserDto {
     const userDto = new UserDto();
 
     userDto.id = user.id;
     userDto.email = user.email;
+    userDto.isFriend = isFriend;
+
+    return userDto;
+  }
+
+  static fromUserWithFriendStatusModel(
+    model: UserWithFriendStatusModel,
+  ): UserDto {
+    const userDto = new UserDto();
+
+    userDto.id = model.user.id;
+    userDto.email = model.user.email;
+    userDto.isFriend = model.isFriend;
 
     return userDto;
   }
