@@ -4,11 +4,12 @@ import { ApiTags } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { CurrentUser } from 'src/common/decorator/current-user.decorator';
 
-@ApiTags('2 - User')
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // TODO: API is for testing
   @Get()
   async findAll() {
     const userEntites = await this.userService.findAll();
@@ -37,6 +38,7 @@ export class UserController {
     return UserDto.fromUserWithFriendStatusModel(model);
   }
 
+  // TODO: API is for testing
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);

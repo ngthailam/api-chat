@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { CatchEverythingFilter } from './common/errors/exception-filters/global.exception-filters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,6 +33,9 @@ async function bootstrap() {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
+
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new CatchEverythingFilter(httpAdapterHost));
 
   await app.listen(3000);
 }

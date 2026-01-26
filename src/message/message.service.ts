@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { ChatMember } from 'src/chat/entities/chat-member';
+import { CustomException } from 'src/common/errors/exception/custom.exception';
+import { CustomErrors } from 'src/common/errors/error_codes';
 
 @Injectable()
 export class MessageService {
@@ -27,10 +29,7 @@ export class MessageService {
 
     this.logger.log(`findAllInChat Found chatMember = ${chatMember}`);
     if (!chatMember) {
-      throw new HttpException(
-        'You are not a member of this chat',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     return this.messageRepo.find({
@@ -42,14 +41,11 @@ export class MessageService {
   async remove(userId: any, messageId: number) {
     const message = await this.messageRepo.findOneBy({ id: messageId });
     if (!message) {
-      throw new HttpException('Message does not exist', HttpStatus.NOT_FOUND);
+      throw new CustomException(CustomErrors.MSG_NOT_EXIST);
     }
 
     if (message.senderId != userId) {
-      throw new HttpException(
-        'You are not the sender of this message',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new CustomException(CustomErrors.MSG_NOT_SENDER);
     }
 
     return this.messageRepo.delete(messageId);
@@ -69,10 +65,7 @@ export class MessageService {
     });
 
     if (!chatMember) {
-      throw new HttpException(
-        'User is not a member of the chat',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     const message = this.messageRepo.create({

@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FriendRequest } from './entities/friend-request';
 import { Repository } from 'typeorm';
 import { FriendService } from 'src/friend/friend.service';
+import { CustomException } from 'src/common/errors/exception/custom.exception';
+import { CustomErrors } from 'src/common/errors/error_codes';
 
 @Injectable()
 export class FriendRequestService {
@@ -27,10 +29,7 @@ export class FriendRequestService {
     });
 
     if (existingFriendRequest.length) {
-      throw new HttpException(
-        'Friend request already exist',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.FR_ALREADY_EXIST);
     }
 
     const friendRequestEntity = new FriendRequest();
@@ -51,17 +50,11 @@ export class FriendRequestService {
     const request = await this.friendRequestRepo.findOneBy({ id: requestId });
 
     if (!request) {
-      throw new HttpException(
-        'Friend request does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new CustomException(CustomErrors.FR_NOT_EXIST);
     }
 
     if (request.senderId != userId) {
-      throw new HttpException(
-        'This request is not sent by you, so you cannot cancel it',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.FR_NOT_OWNER);
     }
 
     return this.friendRequestRepo.delete({ id: requestId });
@@ -75,17 +68,11 @@ export class FriendRequestService {
     const request = await this.friendRequestRepo.findOneBy({ id: requestId });
 
     if (!request) {
-      throw new HttpException(
-        'Friend request does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new CustomException(CustomErrors.FR_NOT_EXIST);
     }
 
     if (request.receiverId != userId) {
-      throw new HttpException(
-        'This request is not sent to you, so you cannot accept or reject it',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.FR_NOT_OWNER);
     }
 
     request.status = response;

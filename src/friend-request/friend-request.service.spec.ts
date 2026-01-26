@@ -4,6 +4,8 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { FriendRequestService } from './friend-request.service';
 import { FriendRequest } from './entities/friend-request';
 import { Repository } from 'typeorm';
+import { CustomException } from 'src/common/errors/exception/custom.exception';
+import { CustomErrors } from 'src/common/errors/error_codes';
 
 describe('FriendRequestService', () => {
   let service: FriendRequestService;
@@ -58,12 +60,7 @@ describe('FriendRequestService', () => {
 
       await expect(
         service.createFriendRequest(userId, targetUserId),
-      ).rejects.toThrow(
-        new HttpException(
-          'Friend request already exist',
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new CustomException(CustomErrors.FR_ALREADY_EXIST));
 
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: [
@@ -86,12 +83,7 @@ describe('FriendRequestService', () => {
 
       await expect(
         service.createFriendRequest(userId, targetUserId),
-      ).rejects.toThrow(
-        new HttpException(
-          'Friend request already exist',
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new CustomException(CustomErrors.FR_ALREADY_EXIST));
 
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: [
@@ -103,7 +95,7 @@ describe('FriendRequestService', () => {
 
     it('should successfully create friend request when no existing request', async () => {
       mockRepository.find.mockResolvedValue([]);
-      
+
       const savedRequest: Partial<FriendRequest> = {
         id: 1,
         senderId: userId,
@@ -178,10 +170,7 @@ describe('FriendRequestService', () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
       await expect(service.remove(userId, requestId)).rejects.toThrow(
-        new HttpException(
-          'Friend request does not exist',
-          HttpStatus.NOT_FOUND,
-        ),
+        new CustomException(CustomErrors.FR_NOT_EXIST),
       );
 
       expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: requestId });
@@ -199,10 +188,7 @@ describe('FriendRequestService', () => {
       mockRepository.findOneBy.mockResolvedValue(request);
 
       await expect(service.remove(userId, requestId)).rejects.toThrow(
-        new HttpException(
-          'This request is not sent by you, so you cannot cancel it',
-          HttpStatus.BAD_REQUEST,
-        ),
+        new CustomException(CustomErrors.FR_NOT_OWNER),
       );
 
       expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: requestId });
@@ -237,12 +223,7 @@ describe('FriendRequestService', () => {
 
       await expect(
         service.respondToFriendRequest(userId, requestId, 'accept'),
-      ).rejects.toThrow(
-        new HttpException(
-          'Friend request does not exist',
-          HttpStatus.NOT_FOUND,
-        ),
-      );
+      ).rejects.toThrow(new CustomException(CustomErrors.FR_NOT_EXIST));
 
       expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: requestId });
     });
@@ -260,12 +241,7 @@ describe('FriendRequestService', () => {
 
       await expect(
         service.respondToFriendRequest(userId, requestId, 'accept'),
-      ).rejects.toThrow(
-        new HttpException(
-          'This request is not sent to you, so you cannot accept or reject it',
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new CustomException(CustomErrors.FR_NOT_OWNER));
 
       expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: requestId });
     });
@@ -341,4 +317,3 @@ describe('FriendRequestService', () => {
     });
   });
 });
-

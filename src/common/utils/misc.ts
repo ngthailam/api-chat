@@ -1,14 +1,13 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { CustomException } from '../errors/exception/custom.exception';
+import { CustomErrors } from '../errors/error_codes';
 
 export function normalizeUserPair(
   userId1: string,
   userId2: string,
 ): { user1Id: string; user2Id: string } {
   if (userId1 === userId2) {
-    throw new HttpException(
-      'Cannot normalize same user IDs',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    throw new CustomException(CustomErrors.CANNOT_NORMALIZE_SAME_ID);
   }
 
   return userId1 > userId2

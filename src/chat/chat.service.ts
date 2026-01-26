@@ -15,6 +15,8 @@ import { ChatMember } from './entities/chat-member';
 import { ChatDto } from './dto/chat.dto';
 import { ChatMemberDto } from './dto/chat-member.dto';
 import { ChatType } from './dto/chat-type';
+import { CustomException } from 'src/common/errors/exception/custom.exception';
+import { CustomErrors } from 'src/common/errors/error_codes';
 
 @Injectable()
 export class ChatService {
@@ -32,10 +34,7 @@ export class ChatService {
   async create(userId: string, createChatDto: CreateChatDto) {
     if (createChatDto.type == ChatType.ONE_ONE) {
       if (createChatDto.memberIds.length != 1) {
-        throw new HttpException(
-          `One to one chat should contains exactly 1 other memberId`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new CustomException(CustomErrors.CHAT_INVALID_MEM_COUNT);
       }
 
       const existingChat = await this.findExistingOneToOneChat(
@@ -152,16 +151,11 @@ export class ChatService {
     ]);
 
     if (!userInMembers) {
-      throw new HttpException(
-        'You are not a member of this chat',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     if (!userInMembers.role || userInMembers.role !== 'admin') {
-      throw new UnauthorizedException(
-        'Only admins can add members to the chat',
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_ADMIN);
     }
 
     const currentChatMembers = await this.chatMemberRepo.find({
@@ -204,10 +198,7 @@ export class ChatService {
     );
 
     if (!requestingUserChatMember) {
-      throw new HttpException(
-        'You are not a member of this chat',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     if (
@@ -232,10 +223,7 @@ export class ChatService {
     });
 
     if (currentUserId! in chatMembers.map((cm) => cm.member.id)) {
-      throw new HttpException(
-        'You are not a member of this chat',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     return this.chatRepo.update({ id }, { name: newName });
@@ -247,10 +235,7 @@ export class ChatService {
     ]);
 
     if (!currentUserMember) {
-      throw new HttpException(
-        'You are not a member of this chat',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
     if (currentUserMember.role !== 'admin') {

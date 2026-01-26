@@ -7,7 +7,7 @@
 [x] API Chat CRUD
 [x] Send messages (real time)
 [] Firebase push notification integration
-[] Create error response with specific custom error code
+[x] Create error response with specific custom error code
 [] Mute notification
 [] Online status (Redis)
 [x] Friends system (Add-Accept-> Only then can allow Chat)
