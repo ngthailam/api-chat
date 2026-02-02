@@ -1,4 +1,4 @@
-# TODOs
+# TODO
 
 ## Core
 
@@ -6,9 +6,9 @@
 [x] Authentication
 [x] API Chat CRUD
 [x] Send messages (real time)
-[] Firebase push notification integration
+[x] Firebase push notification integration
 [x] Create error response with specific custom error code
-[] Mute notification
+[x] Mute notification
 [] Online status (Redis)
 [x] Friends system (Add-Accept-> Only then can allow Chat)
 [x] Reaction

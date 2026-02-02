@@ -37,6 +37,7 @@ export class CatchEverythingFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
       }
     } else {
+      console.log(exception);
       responseBody = {
         statusCode: httpStatus,
         message: 'Something went wrong',

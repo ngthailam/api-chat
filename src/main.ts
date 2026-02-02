@@ -14,6 +14,11 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addSecurityRequirements('bearer')
+    .addGlobalParameters({
+      name: 'x-device-id',
+      in: 'header',
+      description: 'Deivce id',
+    })
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
