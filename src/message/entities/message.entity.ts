@@ -9,6 +9,14 @@ export class Message {
   @Column()
   text: string;
 
+  // 👇 DO NOT try to set this in app code
+  @Column({
+    type: 'tsvector',
+    select: false,
+    nullable: true,
+  })
+  searchVector: string;
+
   @Column()
   senderId: string;
 

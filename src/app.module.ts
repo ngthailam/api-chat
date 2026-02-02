@@ -20,14 +20,15 @@ import { DeviceIdGuard } from './common/guard/device-id.guard';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DATABSE_HOST'),
-        port: configService.get<number>('DATABSE_PORT'), // default Postgres port
+        host: configService.get<string>('DATABASE_HOST'),
+        port: configService.get<number>('DATABASE_PORT'), // default Postgres port
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'), // if you haven’t set one
         database: configService.get<string>('DATABASE_NAME'),
         autoLoadEntities: true,
-        synchronize: true, // TODO: remove on Prod
         retryAttempts: 3,
+        migrations: ['dist/common/database/migrations/*.js'],
+        migrationsTableName: 'migrations',
       }),
       inject: [ConfigService],
     }),

@@ -1,5 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, JoinTable } from 'typeorm';
-import { Chat } from '../../chat/entities/chat.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,4 +10,7 @@ export class User {
 
   @Column()
   passwordHash: string;
+
+  @Column()
+  username: string;
 }

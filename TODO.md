@@ -19,6 +19,7 @@
 
 ## Ehance
 
+[x] Database migration (https://constantsolutions.dk/2024/08/05/nestjs-project-with-typeorm-cli-and-automatic-migrations/)
 [x] Compression -> No need (Should offload this to a reverse proxy)
 [] Caching (cache search/get users ? cache chat rooms ?)
 [x] Security (Helmet, CORS, CRSF, https://docs.nestjs.com/security/csrf)
@@ -28,6 +29,7 @@
 [] Add paging to some APIs (get user by name, get chats, get messages in chat)
 [] Add version control (v1 v2 ?)
 [] CI/CD Auto deploy/host somewhere
+[] Move messages to nosql ?
 
 
 ## Bug

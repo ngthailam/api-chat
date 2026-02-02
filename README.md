@@ -1,7 +1,6 @@
-
 # Description
 
-An backend API for a chat system. 
+An backend API for a chat system.
 
 # Goal
 
@@ -38,3 +37,7 @@ npm test
 
 npm run
 test:cov
+
+### Migration:
+
+node ./node_modules/typeorm/cli.js -d dist/common/database/typeorm.config.js migration:generate ./src/common/database/migrations/add-col-user-username

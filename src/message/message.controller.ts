@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CurrentUser } from 'src/common/decorator/current-user.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateMessageDto } from './dto/update-message.dto';
 
 @ApiTags('Message')
@@ -17,12 +17,30 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
+  // TODO: remove this API, it's for testing
   @Get('')
-  findOne(
+  findAll() {
+    return this.messageService.findAll();
+  }
+
+  @Get('chat/:chatId/messages')
+  @ApiParam({ name: 'chatId', required: true })
+  findMessagesInChat(
     @CurrentUser() user: { userId: string },
-    @Query('chatId') chatId: string,
+    @Param('chatId') chatId: string,
   ) {
     return this.messageService.findAllInChat(user.userId, chatId);
+  }
+
+  @Get('chat/:chatId/messages/search')
+  @ApiQuery({ name: 'keyword', required: true })
+  @ApiParam({ name: 'chatId', required: true })
+  searchInChat(
+    @CurrentUser() user: { userId: string },
+    @Param('chatId') chatId: string,
+    @Query('keyword') keyword: string,
+  ) {
+    return this.messageService.searchInChat(user.userId, chatId, keyword);
   }
 
   @Delete(':messageId')

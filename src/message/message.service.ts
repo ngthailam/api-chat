@@ -23,6 +23,11 @@ export class MessageService {
     return this.messageRepo.findOne({ where: { id: messageId } });
   }
 
+  async findAll(): Promise<MessageModel[]> {
+    const messages = await this.messageRepo.find();
+    return messages.map((e) => mapMessageModel(e));
+  }
+
   async findAllInChat(userId: any, chatId: string): Promise<MessageModel[]> {
     this.logger.log(`findAllInChat for userId = ${userId}, chatId = ${chatId}`);
     const chatMember = await this.chatMemberRepo.findOne({
@@ -110,5 +115,35 @@ export class MessageService {
     }
 
     return mapMessageModel(message);
+  }
+
+  async searchInChat(userId: string, chatId: string, keyword: string) {
+    const chatMember = await this.chatMemberRepo.findOne({
+      where: {
+        chat: { id: chatId },
+        member: { id: userId },
+      },
+    });
+
+    if (!chatMember) {
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
+    }
+
+    return this.messageRepo
+    .createQueryBuilder('m')
+    .select([
+      'm.id',
+      'm.text',
+      'm.createdAt',
+      `ts_rank("m"."searchVector", plainto_tsquery('simple', :query)) AS rank`,
+    ])
+    .where('"m"."chatId" = :chatId', { chatId })
+    .andWhere(
+      `"m"."searchVector" @@ plainto_tsquery('simple', :query)`
+    )
+    .setParameter('query', keyword)
+    .orderBy('rank', 'DESC')
+    .addOrderBy('"m"."createdAt"', 'DESC')
+    .getRawMany();
   }
 }
