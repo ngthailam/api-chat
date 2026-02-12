@@ -1,22 +1,27 @@
+import 'package:demoweb/data/models/chat_messages_response.dart';
 import 'package:demoweb/data/models/message_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data/services/chat_service.dart';
-import '../../../data/services/message_service.dart';
+import '../../../data/services/api_service.dart';
 import '../../../app/services/websocket_service.dart';
+import '../../../app/services/presence_service.dart';
 
 class ChatController extends GetxController {
   // Get services from GetX dependency injection
-  final ChatService chatService = Get.find<ChatService>();
-  final MessageService messageService = Get.find<MessageService>();
+  final ApiService apiService = Get.find<ApiService>();
   final WebSocketService webSocketService = Get.find<WebSocketService>();
+  final PresenceService presenceService = Get.find<PresenceService>();
 
   final chatId = ''.obs;
-  final messages = <MessageModel>[].obs;
+  final messages = <ChatMessageResponseItem>[].obs;
   final messageController = TextEditingController();
   final isLoading = false.obs;
   final isCreatingChat = false.obs;
+
+  // Get member IDs from the chat for presence tracking
+  List<String> get memberIds => _memberIds;
+  List<String> _memberIds = [];
 
   // Load messages for the chat
   Future<void> loadMessages() async {
@@ -25,7 +30,7 @@ class ChatController extends GetxController {
     isLoading.value = true;
     try {
       // Try to load messages from the chat
-      final result = await messageService.getAllMessageInChat(chatId.value);
+      final result = await apiService.getAllMessageInChat(chatId.value);
       messages.value = result;
     } catch (e) {
       if (kDebugMode) {
@@ -86,10 +91,14 @@ class ChatController extends GetxController {
 
       webSocketService.on('new-message', (data) {
         final message = MessageModel.fromJson(data);
-        messages.add(message);
+        messages.add(
+          ChatMessageResponseItem(message: message, reaction: ReactionModel()),
+        );
       });
 
       loadMessages();
+
+      webSocketService.emit('presence:ping', null);
     }
   }
 
@@ -97,11 +106,12 @@ class ChatController extends GetxController {
   Future<void> createChatWithUser(String userId) async {
     isCreatingChat.value = true;
     try {
-      final chat = await chatService.createChat({
+      final chat = await apiService.createChat({
         'memberIds': [userId],
         'type': 'one-one',
       });
       chatId.value = chat.id;
+      _memberIds = chat.members.map((m) => m.id).toList();
 
       // Now connect to WebSocket and load messages
       webSocketService.connect();
@@ -113,6 +123,11 @@ class ChatController extends GetxController {
     } finally {
       isCreatingChat.value = false;
     }
+  }
+
+  // Check if a user is online
+  bool isUserOnline(String userId) {
+    return presenceService.isUserOnline(userId);
   }
 
   @override

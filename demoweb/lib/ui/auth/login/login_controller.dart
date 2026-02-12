@@ -3,22 +3,29 @@ import 'package:demoweb/data/central.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/api_service.dart';
+
+class LoginBindings extends Bindings {
+  @override
+  void dependencies() {
+    Get.put(LoginController());
+  }
+}
 
 class LoginController extends GetxController {
-  // Get the AuthService from GetX dependency injection
-  final AuthService authService = Get.find<AuthService>();
+  // Get the ApiService from GetX dependency injection
+  final ApiService apiService = Get.find<ApiService>();
 
   final emailController = TextEditingController(text: 'string');
   final passwordController = TextEditingController(text: 'string');
 
   // Placeholder for login functionality
   Future<void> login() async {
-    final AuthService authService = Get.find<AuthService>();
+    final ApiService apiService = Get.find<ApiService>();
 
-    // Example of using AuthService:
+    // Example of using ApiService:
     try {
-      final response = await authService.login(
+      final response = await apiService.login(
         emailController.text,
         passwordController.text,
       );

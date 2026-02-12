@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import '../../../data/services/chat_service.dart';
-import '../../../data/services/user_service.dart';
+import '../../../data/services/api_service.dart';
 import '../../../data/models/user_model.dart';
 
 class SearchChatController extends GetxController {
   // Get services from GetX dependency injection
-  final UserService userService = Get.find<UserService>();
-  final ChatService chatService = Get.find<ChatService>();
+  final ApiService apiService = Get.find<ApiService>();
 
   final searchQuery = ''.obs;
   final searchResults = <UserModel>[].obs;
@@ -35,7 +33,7 @@ class SearchChatController extends GetxController {
     });
   }
 
-  // Search users by email using UserService
+  // Search users by email using ApiService
   Future<void> searchUsers(String email) async {
     if (email.isEmpty) {
       searchResults.clear();
@@ -44,8 +42,8 @@ class SearchChatController extends GetxController {
 
     isSearching.value = true;
     try {
-      final user = await userService.findByEmail(email);
-      searchResults.assignAll([user]);
+      final users = await apiService.findByEmail(email);
+      searchResults.value = users;
     } catch (e) {
       if (kDebugMode) {
         print('Error searching user: $e');
@@ -61,7 +59,7 @@ class SearchChatController extends GetxController {
     isCreatingChat.value = true;
     try {
       // Create a chat with the selected user
-      final chat = await chatService.createChat({
+      final chat = await apiService.createChat({
         'memberIds': [user.id],
         'type': 'one-one',
       });

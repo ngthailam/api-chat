@@ -11,6 +11,13 @@ An backend API for a chat system.
 
 ## Commands
 
+### Database commands
+psql
+\l
+\c api_chat
+\dt
+\d+ message
+
 ### NestJS commands
 
 npm run start
@@ -18,7 +25,7 @@ npm run start:dev
 
 ### System commands
 
-brew services start postgresql@15
+appbrew services start postgresql@15
 brew services start redis
 
 ### Flutter commands

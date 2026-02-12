@@ -23,3 +23,12 @@ class MessageModel {
 
   Map<String, dynamic> toJson() => _$MessageModelToJson(this);
 }
+
+@JsonSerializable()
+class ReactionModel {
+  const ReactionModel();
+
+  factory ReactionModel.fromJson(Map<String, dynamic> json) =>
+      _$ReactionModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ReactionModelToJson(this);
+}

@@ -13,7 +13,8 @@ class WebSocketService {
 
   void connect() {
     socket = IO.io(
-      'http://127.0.0.1:$port/$namespace',
+      // ignore: prefer_interpolation_to_compose_strings
+      'http://127.0.0.1:$port' + (namespace.isNotEmpty ? '/$namespace' : ''),
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -24,6 +25,7 @@ class WebSocketService {
           .enableForceNew()
           .setAuth({
             'authorization': 'Bearer ${Central.accessToken}',
+            'x-device-id': Central.deviceId,
           }) // Pass the raw token
           .build(),
     );

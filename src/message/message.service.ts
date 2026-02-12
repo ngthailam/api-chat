@@ -29,7 +29,7 @@ export class MessageService {
   }
 
   async findAllInChat(userId: any, chatId: string): Promise<MessageModel[]> {
-    this.logger.log(`findAllInChat for userId = ${userId}, chatId = ${chatId}`);
+    console.log(`findAllInChat for userId = ${userId}, chatId = ${chatId}`);
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
         chat: { id: chatId },
@@ -130,20 +130,18 @@ export class MessageService {
     }
 
     return this.messageRepo
-    .createQueryBuilder('m')
-    .select([
-      'm.id',
-      'm.text',
-      'm.createdAt',
-      `ts_rank("m"."searchVector", plainto_tsquery('simple', :query)) AS rank`,
-    ])
-    .where('"m"."chatId" = :chatId', { chatId })
-    .andWhere(
-      `"m"."searchVector" @@ plainto_tsquery('simple', :query)`
-    )
-    .setParameter('query', keyword)
-    .orderBy('rank', 'DESC')
-    .addOrderBy('"m"."createdAt"', 'DESC')
-    .getRawMany();
+      .createQueryBuilder('m')
+      .select([
+        'm.id',
+        'm.text',
+        'm.createdAt',
+        `ts_rank("m"."searchVector", websearch_to_tsquery('english', :query)) AS rank`,
+      ])
+      .where('"m"."chatId" = :chatId', { chatId })
+      .andWhere(`"m"."searchVector" @@ websearch_to_tsquery('english', :query)`)
+      .setParameter('query', keyword)
+      .orderBy('rank', 'DESC')
+      .addOrderBy('"m"."createdAt"', 'DESC')
+      .getRawMany();
   }
 }

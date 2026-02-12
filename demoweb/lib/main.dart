@@ -1,3 +1,4 @@
+import 'package:demoweb/ui/auth/login/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/bindings/dependency_injection.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: AppRoutes.login,
       getPages: AppRoutes.routes,
+      initialBinding: LoginBindings(),
       home: const LoginPage(),
     );
   }

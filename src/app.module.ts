@@ -13,6 +13,8 @@ import { FriendModule } from './friend/friend.module';
 import { NotificationModule } from './notification/notification.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DeviceIdGuard } from './common/guard/device-id.guard';
+import { PresenceModule } from './presence/presence.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { DeviceIdGuard } from './common/guard/device-id.guard';
         retryAttempts: 3,
         migrations: ['dist/common/database/migrations/*.js'],
         migrationsTableName: 'migrations',
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),
@@ -40,6 +43,8 @@ import { DeviceIdGuard } from './common/guard/device-id.guard';
     FriendModule,
     NotificationModule,
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
+    PresenceModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

@@ -20,7 +20,7 @@ import { MessageService } from '../message.service';
  * - sending messages
  * - 
  */
-@WebSocketGateway(81, { namespace: 'message' })
+@WebSocketGateway(80)
 export class MessageWebSocketGateway {
   @WebSocketServer()
   private server: Server;

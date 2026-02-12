@@ -11,6 +11,6 @@ export class User {
   @Column()
   passwordHash: string;
 
-  @Column()
+  @Column({ nullable: true })
   username: string;
 }

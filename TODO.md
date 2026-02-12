@@ -9,13 +9,13 @@
 [x] Firebase push notification integration
 [x] Create error response with specific custom error code
 [x] Mute notification
-[] Online status (Redis)
+[x] Online status (Redis)
 [x] Friends system (Add-Accept-> Only then can allow Chat)
 [x] Reaction
 [] Quote
 [] Send photos
-[] Search text in chat
-[] Centralize all Gateway to 1 port to use the same connection
+[x] Search text in chat
+[x] Centralize all Gateway to 1 port to use the same connection
 
 ## Ehance
 
@@ -34,3 +34,4 @@
 
 ## Bug
 [] Check for double creating one-one chat
+[] Search text is only full word search, check for partial word search
