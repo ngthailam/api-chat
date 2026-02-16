@@ -7,10 +7,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { FriendRequestService } from './friend-request.service';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
+import { FriendRequestService } from './friend-request.service.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
 import { ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { RespondFriendRequestDto } from './dto/respond-friend-request.dto';
+import { RespondFriendRequestDto } from './dto/respond-friend-request.dto.js';
 
 @Controller('friend-request')
 @ApiTags('Friend Request')

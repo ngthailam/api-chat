@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserToken } from './entity/user-token.entity';
-import { UpdateUserTokenDto } from './dto/update-user-token.dto';
-import { RegisterUserTokenDto } from './dto/register-user-token.dto';
-import { FirebaseService } from 'src/notification/providers/firebase/firebase.service';
-import { NotificationModel } from './model/notification.model';
+import { UserToken } from './entity/user-token.entity.js';
+import { UpdateUserTokenDto } from './dto/update-user-token.dto.js';
+import { RegisterUserTokenDto } from './dto/register-user-token.dto.js';
+import { FirebaseService } from '../notification/providers/firebase/firebase.service.js';
+import { NotificationModel } from './model/notification.model.js';
 
 @Injectable()
 export class NotificationService {

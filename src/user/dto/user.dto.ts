@@ -1,5 +1,5 @@
-import { User } from '../entities/user.entity';
-import { UserWithFriendStatusModel } from '../model/user-with-friend-status.model';
+import { User } from '../entities/user.entity.js';
+import { UserWithFriendStatusModel } from '../model/user-with-friend-status.model.js';
 
 export class UserDto {
   id: string;

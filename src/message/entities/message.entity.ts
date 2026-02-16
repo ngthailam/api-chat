@@ -1,10 +1,25 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { ReactionType } from '../model/reaction-type';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  Index,
+  PrimaryColumn,
+} from 'typeorm';
+import { v7 as uuidv7 } from 'uuid';
+import { ReactionType } from '../model/reaction-type.js';
 
 @Entity()
+@Index(['chatId', 'id'])
 export class Message {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn('uuid')
+  id: string;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = uuidv7();
+    }
+  }
 
   @Column()
   text: string;
@@ -28,4 +43,14 @@ export class Message {
 
   @Column()
   createdAt: Date;
+
+  /**
+   * Do this instead of quoteMessageId to reduce queries when fetching messages with quotes.
+   * This is a denormalization for performance optimization.
+   */
+  @Column({ default: null, nullable: true })
+  quoteMessageId: string | null;
+
+  @Column({ default: null, nullable: true })
+  quoteMessageText: string | null;
 }

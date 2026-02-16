@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { ChatType } from '../dto/chat-type';
+import { ChatType } from '../dto/chat-type.js';
 
 @Entity()
 export class Chat {

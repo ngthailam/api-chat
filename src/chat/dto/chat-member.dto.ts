@@ -1,4 +1,4 @@
-import { ChatMember } from '../entities/chat-member';
+import { ChatMember } from '../entities/chat-member.js';
 
 export class ChatMemberDto {
   id: string;

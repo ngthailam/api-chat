@@ -9,16 +9,16 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { HttpException } from '@nestjs/common';
-import { WsAuthGuard } from 'src/common/guard/ws-auth.guard';
-import { WsCurrentUserDecorator } from 'src/common/decorator/ws-current-user.decorator';
-import { Message } from 'src/message/entities/message.entity';
-import { MessageService } from '../message.service';
+import { MessageService } from '../message.service.js';
+import { Message } from '../entities/message.entity.js';
+import { WsAuthGuard } from '../../common/guard/ws-auth.guard.js';
+import { WsCurrentUserDecorator } from '../../common/decorator/ws-current-user.decorator.js';
 
 /**
  * Gateway for:
  * - join chat
  * - sending messages
- * - 
+ * -
  */
 @WebSocketGateway(80)
 export class MessageWebSocketGateway {
@@ -32,11 +32,17 @@ export class MessageWebSocketGateway {
   @SubscribeMessage('send-message')
   @UseGuards(WsAuthGuard)
   async handleMessage(
-    @MessageBody() payload: { chatId: string; text: string },
+    @MessageBody()
+    payload: {
+      chatId: string;
+      text: string;
+      quoteMessageId?: string | null;
+      quoteMessageText?: string | null;
+    },
     @ConnectedSocket() client: Socket,
     @WsCurrentUserDecorator() user: any,
   ) {
-    const { text } = payload;
+    const { text, quoteMessageId, quoteMessageText } = payload;
     const chatId = client.data.chatId;
     const senderId = user?.userId;
 
@@ -49,6 +55,8 @@ export class MessageWebSocketGateway {
         chatId,
         senderId,
         text,
+        quoteMessageId,
+        quoteMessageText,
       );
 
       this.server.to(chatId).emit('new-message', result);

@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from './user.service.js';
 import { ApiTags } from '@nestjs/swagger';
-import { UserDto } from './dto/user.dto';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
+import { UserDto } from './dto/user.dto.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
 
 @ApiTags('User')
 @Controller('user')

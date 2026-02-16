@@ -1,10 +1,10 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
-import { Public } from 'src/common/guard/jwt.guard';
+import { AuthService } from './auth.service.js';
+import { LoginDto } from './dto/login.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
+import { Public } from '../common/guard/jwt.guard.js';
 
 @ApiTags('Auth')
 @Controller('auth')

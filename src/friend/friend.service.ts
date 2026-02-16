@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Friend } from './entities/friend.entities';
+import { Friend } from './entities/friend.entities.js';
 import { Repository } from 'typeorm';
-import { normalizeUserPair } from 'src/common/utils/misc';
+import { normalizeUserPair } from '../common/utils/misc.js';
 
 @Injectable()
 export class FriendService {

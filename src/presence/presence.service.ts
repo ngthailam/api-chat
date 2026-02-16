@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
-import { UserIdDeviceIdModel } from './model/userid-deviceid.model';
+import { Redis } from 'ioredis';
+import { UserIdDeviceIdModel } from './model/userid-deviceid.model.js';
 
 @Injectable()
 export class PresenceService {
@@ -21,15 +21,15 @@ export class PresenceService {
   }
 
   async markOnline(model: UserIdDeviceIdModel) {
-    console.log("Marking online:", model);
+    console.log('Marking online:', model);
 
     if (await this.isOnline(model)) {
-      console.log("Already online, refreshing TTL:", model);
+      console.log('Already online, refreshing TTL:', model);
       this.refresh(model);
       return;
     }
 
-    console.log("Setting online status in Redis:", model);
+    console.log('Setting online status in Redis:', model);
     await this.redis.set(
       this.buildKey(model.userId, model.deviceId),
       1,
@@ -68,7 +68,10 @@ export class PresenceService {
   async getOnlineStatuses(
     userIdDeviceIdPair: UserIdDeviceIdModel[],
   ): Promise<Record<number, boolean>> {
-    console.log("PresenceService getOnlineStatuses called with:", userIdDeviceIdPair);
+    console.log(
+      'PresenceService getOnlineStatuses called with:',
+      userIdDeviceIdPair,
+    );
 
     if (!userIdDeviceIdPair.length) {
       return {};

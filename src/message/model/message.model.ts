@@ -1,18 +1,25 @@
-import { Message } from '../entities/message.entity';
-import { ReactionType } from './reaction-type';
+import { Message } from '../entities/message.entity.js';
+import { ReactionType } from './reaction-type.js';
 
 export type MessageModel = {
   message: MessageBasicInfoModel;
   reaction: ReactionModel;
+  quote?: MessageQuoteModel;
 };
 
 export type MessageBasicInfoModel = {
-  id: number;
+  id: string;
   text: string;
   senderId: string;
   chatId: string;
   createdAt: Date;
 };
+
+export type MessageQuoteModel = {
+  type: 'text';
+  messageId: string;
+  text: string;
+}
 
 export function mapMessageModel(message: Message): MessageModel {
   return {
@@ -24,6 +31,7 @@ export function mapMessageModel(message: Message): MessageModel {
       createdAt: message.createdAt,
     },
     reaction: mapReactionsToModel(message.reactions),
+    quote: mapQuoteToModel(message),
   };
 }
 
@@ -62,3 +70,15 @@ export function mapReactionsToModel(
 
   return { count, sender };
 }
+function mapQuoteToModel(message: Message): MessageQuoteModel | null {
+  if (!message.quoteMessageId) {
+    return null;
+  }
+  
+  return {
+    type: 'text',
+    messageId: message.quoteMessageId,
+    text: message.quoteMessageText,
+  }
+}
+

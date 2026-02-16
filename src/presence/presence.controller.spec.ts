@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PresenceController } from './presence.controller';
+import { PresenceController } from './presence.controller.js';
 
 describe('PresenceController', () => {
   let controller: PresenceController;

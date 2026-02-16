@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { FriendRequestService } from './friend-request.service';
-import { FriendRequest } from './entities/friend-request';
+import { FriendRequestService } from './friend-request.service.js';
+import { FriendRequest } from './entities/friend-request.js';
 import { Repository } from 'typeorm';
-import { CustomException } from 'src/common/errors/exception/custom.exception';
-import { CustomErrors } from 'src/common/errors/error_codes';
+import { CustomException } from '../common/errors/exception/custom.exception.js';
+import { CustomErrors } from '../common/errors/error_codes.js';
 
 describe('FriendRequestService', () => {
   let service: FriendRequestService;

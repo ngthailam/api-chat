@@ -8,9 +8,9 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { ChatService } from './chat.service';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
+import { ChatService } from './chat.service.js';
+import { CreateChatDto } from './dto/create-chat.dto.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Chat')

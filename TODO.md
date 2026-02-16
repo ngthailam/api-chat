@@ -12,12 +12,12 @@
 [x] Online status (Redis)
 [x] Friends system (Add-Accept-> Only then can allow Chat)
 [x] Reaction
-[] Quote
+[x] Quote
 [] Send photos
 [x] Search text in chat
 [x] Centralize all Gateway to 1 port to use the same connection
 
-## Ehance
+## Enhance
 
 [x] Database migration (https://constantsolutions.dk/2024/08/05/nestjs-project-with-typeorm-cli-and-automatic-migrations/)
 [x] Compression -> No need (Should offload this to a reverse proxy)
@@ -26,10 +26,12 @@
 [x] Performance (Fastify ?) -> No need, this is just simple CRUD app
 [] Race condition handling
 [] Task scheduling (try accesing the database and/or notification)
-[] Add paging to some APIs (get user by name, get chats, get messages in chat)
+[x] Add paging to some APIs (get user by name, get chats, get messages in chat)
 [] Add version control (v1 v2 ?)
 [] CI/CD Auto deploy/host somewhere
 [] Move messages to nosql ?
+[] Restructer the Model, Entity, Dto, Response thing
+[] API to load surrounding message (for search/ quote) (do after pagination)
 
 
 ## Bug

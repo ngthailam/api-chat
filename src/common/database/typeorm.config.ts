@@ -15,5 +15,5 @@ export const AppDataSource = new DataSource({
   migrations: ['dist/common/database/migrations/*.js'],
   migrationsTableName: 'migrations',
 
-  synchronize: false, // 🚫 always false
+  synchronize: false,
 });

@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { CustomError } from '../error_codes';
+import { CustomError } from '../error_codes.js';
 
 export class CustomException extends Error {
   private readonly errMessage: string;

@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { FriendService } from './friend.service';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
+import { FriendService } from './friend.service.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags("Friend")

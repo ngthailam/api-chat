@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FriendRequest } from './entities/friend-request';
+import { FriendRequest } from './entities/friend-request.js';
 import { Repository } from 'typeorm';
-import { FriendService } from 'src/friend/friend.service';
-import { CustomException } from 'src/common/errors/exception/custom.exception';
-import { CustomErrors } from 'src/common/errors/error_codes';
+import { FriendService } from '../friend/friend.service.js';
+import { CustomException } from '../common/errors/exception/custom.exception.js';
+import { CustomErrors } from '../common/errors/error_codes.js';
 
 @Injectable()
 export class FriendRequestService {

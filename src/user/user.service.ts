@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User } from './entities/user.entity.js';
 import { ILike, Repository } from 'typeorm';
-import { Friend } from 'src/friend/entities/friend.entities';
-import { normalizeUserPair } from 'src/common/utils/misc';
-import { UserWithFriendStatusModel } from './model/user-with-friend-status.model';
+import { UserWithFriendStatusModel } from './model/user-with-friend-status.model.js';
+import { Friend } from '../friend/entities/friend.entities.js';
+import { normalizeUserPair } from '../common/utils/misc.js';
 
 @Injectable()
 export class UserService {

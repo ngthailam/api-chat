@@ -6,17 +6,17 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
+import { CreateChatDto } from './dto/create-chat.dto.js';
 import { In, Not, Repository } from 'typeorm';
-import { Chat } from './entities/chat.entity';
-import { User } from '../user/entities/user.entity';
+import { Chat } from './entities/chat.entity.js';
+import { User } from '../user/entities/user.entity.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChatMember } from './entities/chat-member';
-import { ChatDto } from './dto/chat.dto';
-import { ChatMemberDto } from './dto/chat-member.dto';
-import { ChatType } from './dto/chat-type';
-import { CustomException } from 'src/common/errors/exception/custom.exception';
-import { CustomErrors } from 'src/common/errors/error_codes';
+import { ChatMember } from './entities/chat-member.js';
+import { ChatDto } from './dto/chat.dto.js';
+import { ChatMemberDto } from './dto/chat-member.dto.js';
+import { ChatType } from './dto/chat-type.js';
+import { CustomException } from '../common/errors/exception/custom.exception.js';
+import { CustomErrors } from '../common/errors/error_codes.js';
 
 @Injectable()
 export class ChatService {

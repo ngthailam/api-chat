@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
-import { NotificationService } from './notification.service';
-import { CurrentUser } from 'src/common/decorator/current-user.decorator';
-import { UpdateUserTokenDto } from './dto/update-user-token.dto';
-import { RegisterUserTokenDto } from './dto/register-user-token.dto';
-import { DeviceId } from 'src/common/decorator/device-id.decorator';
+import { NotificationService } from './notification.service.js';
+import { CurrentUser } from '../common/decorator/current-user.decorator.js';
+import { UpdateUserTokenDto } from './dto/update-user-token.dto.js';
+import { RegisterUserTokenDto } from './dto/register-user-token.dto.js';
+import { DeviceId } from '../common/decorator/device-id.decorator.js';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Notification')

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ArrayNotEmpty, IsEnum, IsNotEmpty } from 'class-validator';
-import { ChatType } from './chat-type';
+import { ChatType } from './chat-type.js';
 
 export class CreateChatDto {
   name?: string;

@@ -1,20 +1,20 @@
 import { Logger, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { ChatModule } from './chat/chat.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { UserModule } from './user/user.module.js';
+import { ChatModule } from './chat/chat.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './auth/auth.module.js';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './common/guard/jwt.guard';
-import { MessageModule } from './message/message.module';
-import { FriendRequestModule } from './friend-request/friend-request.module';
-import { FriendModule } from './friend/friend.module';
-import { NotificationModule } from './notification/notification.module';
+import { JwtAuthGuard } from './common/guard/jwt.guard.js';
+import { MessageModule } from './message/message.module.js';
+import { FriendRequestModule } from './friend-request/friend-request.module.js';
+import { FriendModule } from './friend/friend.module.js';
+import { NotificationModule } from './notification/notification.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DeviceIdGuard } from './common/guard/device-id.guard';
-import { PresenceModule } from './presence/presence.module';
-import { RedisModule } from './redis/redis.module';
+import { DeviceIdGuard } from './common/guard/device-id.guard.js';
+import { PresenceModule } from './presence/presence.module.js';
+import { RedisModule } from './redis/redis.module.js';
 
 @Module({
   imports: [

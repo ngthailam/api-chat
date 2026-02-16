@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PresenceGateway } from './presence.gateway';
+import { PresenceGateway } from './presence.gateway.js';
 
 describe('PresenceGateway', () => {
   let gateway: PresenceGateway;

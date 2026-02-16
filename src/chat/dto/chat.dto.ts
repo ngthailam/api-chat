@@ -1,6 +1,6 @@
-import { ChatMember } from '../entities/chat-member';
-import { Chat } from '../entities/chat.entity';
-import { ChatMemberDto } from './chat-member.dto';
+import { ChatMember } from '../entities/chat-member.js';
+import { Chat } from '../entities/chat.entity.js';
+import { ChatMemberDto } from './chat-member.dto.js';
 
 export class ChatDto {
   id: string;

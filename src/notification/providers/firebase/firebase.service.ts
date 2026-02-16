@@ -1,8 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import {
-  NotificationWithTokenModel,
-} from 'src/notification/model/notification.model';
+import { NotificationWithTokenModel } from '../../model/notification.model.js';
 
 @Injectable()
 export class FirebaseService {

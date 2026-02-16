@@ -1,6 +1,5 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { CustomException } from '../errors/exception/custom.exception';
-import { CustomErrors } from '../errors/error_codes';
+import { CustomException } from '../errors/exception/custom.exception.js';
+import { CustomErrors } from '../errors/error_codes.js';
 
 export function normalizeUserPair(
   userId1: string,

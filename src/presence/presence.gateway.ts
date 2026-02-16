@@ -5,12 +5,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { PresenceService } from './presence.service';
+import { PresenceService } from './presence.service.js';
 import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
-import { WsAuthGuard } from 'src/common/guard/ws-auth.guard';
-import { WsCurrentUserDecorator } from 'src/common/decorator/ws-current-user.decorator';
-import { WsDeviceIdDecorator } from 'src/common/decorator/ws-device-id.decorator';
+import { WsAuthGuard } from '../common/guard/ws-auth.guard.js';
+import { WsCurrentUserDecorator } from '../common/decorator/ws-current-user.decorator.js';
+import { WsDeviceIdDecorator } from '../common/decorator/ws-device-id.decorator.js';
 
 /**
  * Gateway for managing user presence:

@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Message } from './entities/message.entity';
-import { ChatMember } from 'src/chat/entities/chat-member';
-import { CustomException } from 'src/common/errors/exception/custom.exception';
-import { CustomErrors } from 'src/common/errors/error_codes';
-import { UpdateMessageDto } from './dto/update-message.dto';
-import { mapMessageModel, MessageModel } from './model/message.model';
+import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
+import { Message } from './entities/message.entity.js';
+import { ChatMember } from '../chat/entities/chat-member.js';
+import { CustomException } from '../common/errors/exception/custom.exception.js';
+import { CustomErrors } from '../common/errors/error_codes.js';
+import { UpdateMessageDto } from './dto/update-message.dto.js';
+import { mapMessageModel, MessageModel } from './model/message.model.js';
+import { MessageListModel } from './model/message-list.model.js';
 
 @Injectable()
 export class MessageService {
@@ -19,7 +20,7 @@ export class MessageService {
 
   private logger = new Logger(MessageService.name);
 
-  async findOne(messageId: number) {
+  async findOne(messageId: string): Promise<Message> {
     return this.messageRepo.findOne({ where: { id: messageId } });
   }
 
@@ -28,30 +29,104 @@ export class MessageService {
     return messages.map((e) => mapMessageModel(e));
   }
 
-  async findAllInChat(userId: any, chatId: string): Promise<MessageModel[]> {
-    console.log(`findAllInChat for userId = ${userId}, chatId = ${chatId}`);
+  async findAllInChat(
+    userId: string,
+    chatId: string,
+    cursor?: string,
+    limit = 20,
+  ): Promise<MessageListModel> {
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
         chat: { id: chatId },
         member: { id: userId },
       },
-      relations: ['member', 'chat'],
     });
 
-    this.logger.log(`findAllInChat Found chatMember = ${chatMember}`);
     if (!chatMember) {
       throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
+    const where: FindOptionsWhere<Message> = { chatId };
+
+    if (cursor) {
+      where.id = LessThan(cursor);
+    }
+
     const messages = await this.messageRepo.find({
-      where: { chatId: chatId },
-      order: { createdAt: 'DESC' },
+      where,
+      order: { id: 'DESC' },
+      take: limit + 1,
     });
 
-    return messages.map((e) => mapMessageModel(e));
+    const hasMore = messages.length > limit;
+    if (hasMore) messages.pop();
+
+    return {
+      messages: messages.map(mapMessageModel),
+      hasMore,
+      nextCursor: hasMore ? messages[messages.length - 1].id : null,
+      total: messages.length,
+    };
   }
 
-  async remove(userId: any, messageId: number) {
+  async findSurroundingMessages(
+    userId: string,
+    chatId: string,
+    messageId: string,
+  ): Promise<Message[]> {
+    // 1️⃣ Ensure user is member (keep your existing check)
+
+    const chatMember = await this.chatMemberRepo.findOne({
+      where: {
+        chat: { id: chatId },
+        member: { id: userId },
+      },
+    });
+
+    if (!chatMember) {
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
+    }
+
+    const anchorId = messageId;
+    const limit = 10; // number of messages to load before and after
+
+    // Load anchor itself
+    const anchor = await this.messageRepo.findOne({
+      where: { id: anchorId, chatId },
+    });
+
+    if (!anchor) {
+      throw new CustomException(CustomErrors.MSG_NOT_EXIST);
+    }
+
+    //  Load older messages (before anchor)
+    const older = await this.messageRepo.find({
+      where: {
+        chatId,
+        id: LessThan(anchorId),
+      },
+      order: { id: 'DESC' },
+      take: limit,
+    });
+
+    // Load newer messages (after anchor)
+    const newer = await this.messageRepo.find({
+      where: {
+        chatId,
+        id: MoreThan(anchorId),
+      },
+      order: { id: 'ASC' }, // important!
+      take: limit,
+    });
+
+    return [
+      ...older.reverse(), // oldest → newest
+      anchor,
+      ...newer,
+    ];
+  }
+
+  async remove(userId: string, messageId: string) {
     const message = await this.messageRepo.findOneBy({ id: messageId });
     if (!message) {
       throw new CustomException(CustomErrors.MSG_NOT_EXIST);
@@ -68,6 +143,8 @@ export class MessageService {
     chatId: string,
     senderId: string,
     text: string,
+    quoteMessageId?: string | null,
+    quoteMessageText?: string | null,
   ): Promise<Message> {
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
@@ -86,13 +163,15 @@ export class MessageService {
       senderId,
       chatId,
       createdAt: new Date(),
+      quoteMessageId: quoteMessageId,
+      quoteMessageText: quoteMessageText,
     });
     return this.messageRepo.save(message);
   }
 
   async update(
     userId: string,
-    messageId: number,
+    messageId: string,
     request: UpdateMessageDto,
   ): Promise<MessageModel | null> {
     const message = await this.findOne(messageId);

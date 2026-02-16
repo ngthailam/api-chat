@@ -1,5 +1,5 @@
 import { IsEnum, IsIn, IsOptional } from 'class-validator';
-import { ReactionType } from '../model/reaction-type';
+import { ReactionType } from '../model/reaction-type.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateMessageDto {
