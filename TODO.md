@@ -31,7 +31,7 @@
 [] CI/CD Auto deploy/host somewhere
 [] Move messages to nosql ?
 [] Restructer the Model, Entity, Dto, Response thing
-[] API to load surrounding message (for search/ quote) (do after pagination)
+[x] API to load surrounding message (for search/ quote) (do after pagination)
 
 
 ## Bug

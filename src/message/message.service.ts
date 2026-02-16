@@ -1,6 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, LessThan, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import {
+  FindOptionsWhere,
+  LessThan,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { Message } from './entities/message.entity.js';
 import { ChatMember } from '../chat/entities/chat-member.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
@@ -29,68 +36,77 @@ export class MessageService {
     return messages.map((e) => mapMessageModel(e));
   }
 
-  async findAllInChat(
+  private async findMessagesByCursor(
+    userId: string,
+    chatId: string,
+    limit: number,
+    direction: 'older' | 'newer',
+    cursor?: string,
+  ): Promise<MessageListModel> {
+    await this.ensureChatMember(userId, chatId);
+
+    const where: FindOptionsWhere<Message> = { chatId };
+
+    if (cursor) {
+      where.id =
+        direction === 'older'
+          ? LessThanOrEqual(cursor)
+          : MoreThanOrEqual(cursor);
+    }
+
+    const orderDirection = direction === 'older' ? 'DESC' : 'ASC';
+
+    const messages = await this.messageRepo.find({
+      where,
+      order: { id: orderDirection },
+      take: limit + 1, // +1 to detect hasMore
+    });
+
+    const hasMore = messages.length > limit;
+    const sliced = hasMore ? messages.slice(0, -1) : messages;
+    const nextCursor = hasMore ? messages[messages.length - 1].id : null;
+
+    return {
+      messages: sliced.map(mapMessageModel),
+      hasMore,
+      nextCursor: nextCursor,
+      total: sliced.length,
+    };
+  }
+
+  async findOlderMessagesInChat(
     userId: string,
     chatId: string,
     limit: number,
     cursor?: string,
   ): Promise<MessageListModel> {
-    const chatMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: userId },
-      },
-    });
+    return this.findMessagesByCursor(userId, chatId, limit, 'older', cursor);
+  }
 
-    if (!chatMember) {
-      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
-    }
-
-    const where: FindOptionsWhere<Message> = { chatId };
-
-    if (cursor) {
-      where.id = LessThanOrEqual(cursor);
-    }
-
-    const messages = await this.messageRepo.find({
-      where,
-      order: { id: 'DESC' },
-      take: limit + 1, // +1 to check if there's more
-    });
-
-    const hasMore = messages.length > limit;
-    const nextCursor = hasMore ? messages[messages.length - 1].id : null;
-    const finalMessages = hasMore ? messages.slice(0, -1) : messages;
-
-    return {
-      messages: finalMessages.map(mapMessageModel),
-      hasMore,
-      nextCursor: nextCursor,
-      total: finalMessages.length,
-    };
+  async findNewerMessagesInChat(
+    userId: string,
+    chatId: string,
+    limit: number,
+    cursor?: string,
+  ): Promise<MessageListModel> {
+    return this.findMessagesByCursor(userId, chatId, limit, 'newer', cursor);
   }
 
   async findSurroundingMessages(
     userId: string,
     chatId: string,
     messageId: string,
-    limit: number,
-  ): Promise<Message[]> {
+    limit?: number,
+  ): Promise<MessageListModel> {
     // 1️⃣ Ensure user is member (keep your existing check)
-
-    const chatMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: userId },
-      },
-    });
-
-    if (!chatMember) {
-      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
-    }
+    this.ensureChatMember(userId, chatId); // throws if not member
 
     const anchorId = messageId;
-    const tooWayLimit = Math.floor(limit / 2); // number of messages to load before and after
+    const safeLimit =
+      typeof limit === 'number' && Number.isFinite(limit) && limit > 0
+        ? limit
+        : 20;
+    const twoWayLimit: number = Math.floor(safeLimit / 2); // number of messages to load before and after
 
     // Load anchor itself
     const anchor = await this.messageRepo.findOne({
@@ -102,30 +118,46 @@ export class MessageService {
     }
 
     //  Load older messages (before anchor)
-    const older = await this.messageRepo.find({
+    const olderMessages = await this.messageRepo.find({
       where: {
         chatId,
         id: LessThan(anchorId),
       },
       order: { id: 'DESC' },
-      take: tooWayLimit,
+      take: twoWayLimit,
     });
 
     // Load newer messages (after anchor)
-    const newer = await this.messageRepo.find({
+    const newerMessages = await this.messageRepo.find({
       where: {
         chatId,
         id: MoreThan(anchorId),
       },
       order: { id: 'ASC' }, // important!
-      take: tooWayLimit,
+      take: twoWayLimit + 1, // +1 to check if there's more after anchor
     });
 
-    return [
-      ...older.reverse(), // oldest → newest
+    const hasMore = newerMessages.length > twoWayLimit;
+    const slicedNewerMessages = hasMore
+      ? newerMessages.slice(0, -1)
+      : newerMessages;
+    const nextCursor = hasMore
+      ? newerMessages[newerMessages.length - 1].id
+      : null;
+
+    const fullMessageList = [
+      ...olderMessages.reverse(), // oldest → newest
       anchor,
-      ...newer,
+      ...slicedNewerMessages,
     ];
+
+    // TODO: add has more, next cursor info if needed
+    return {
+      messages: fullMessageList.map(mapMessageModel),
+      hasMore,
+      nextCursor: nextCursor,
+      total: fullMessageList.length,
+    };
   }
 
   async remove(userId: string, messageId: string) {
@@ -148,17 +180,7 @@ export class MessageService {
     quoteMessageId?: string | null,
     quoteMessageText?: string | null,
   ): Promise<Message> {
-    const chatMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: senderId },
-      },
-      relations: ['member'],
-    });
-
-    if (!chatMember) {
-      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
-    }
+    this.ensureChatMember(senderId, chatId); // throws if not member
 
     const message = this.messageRepo.create({
       text,
@@ -198,17 +220,12 @@ export class MessageService {
     return mapMessageModel(message);
   }
 
-  async searchInChat(userId: string, chatId: string, keyword: string) {
-    const chatMember = await this.chatMemberRepo.findOne({
-      where: {
-        chat: { id: chatId },
-        member: { id: userId },
-      },
-    });
-
-    if (!chatMember) {
-      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
-    }
+  async searchInChat(
+    userId: string,
+    chatId: string,
+    keyword: string,
+  ): Promise<Message[]> {
+    this.ensureChatMember(userId, chatId); // throws if not member
 
     return this.messageRepo
       .createQueryBuilder('m')
@@ -224,5 +241,18 @@ export class MessageService {
       .orderBy('rank', 'DESC')
       .addOrderBy('"m"."createdAt"', 'DESC')
       .getRawMany();
+  }
+
+  private async ensureChatMember(userId: string, chatId: string) {
+    const chatMember = await this.chatMemberRepo.findOne({
+      where: {
+        chat: { id: chatId },
+        member: { id: userId },
+      },
+    });
+
+    if (!chatMember) {
+      throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
+    }
   }
 }

@@ -60,17 +60,36 @@ export class MessageController {
     );
   }
 
-  @Get('chat/:chatId/messages')
+  @Get('chat/:chatId/messages/old')
   @ApiParam({ name: 'chatId', required: true })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  async findMessagesInChat(
+  async findOlderMessagesInChat(
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit: number = 20,
   ): Promise<MessageListResponse> {
-    const model = await this.messageService.findAllInChat(
+    const model = await this.messageService.findOlderMessagesInChat(
+      user.userId,
+      chatId,
+      +limit,
+      cursor,
+    );
+    return mapMessageListModelToResponse(model);
+  }
+
+  @Get('chat/:chatId/messages/new')
+  @ApiParam({ name: 'chatId', required: true })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async findNewerMessagesInChat(
+    @CurrentUser() user: { userId: string },
+    @Param('chatId') chatId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit: number = 20,
+  ): Promise<MessageListResponse> {
+    const model = await this.messageService.findNewerMessagesInChat(
       user.userId,
       chatId,
       +limit,
