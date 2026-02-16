@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
+import { FindOptionsWhere, LessThan, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 import { Message } from './entities/message.entity.js';
 import { ChatMember } from '../chat/entities/chat-member.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
@@ -32,8 +32,8 @@ export class MessageService {
   async findAllInChat(
     userId: string,
     chatId: string,
+    limit: number,
     cursor?: string,
-    limit = 20,
   ): Promise<MessageListModel> {
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
@@ -49,23 +49,24 @@ export class MessageService {
     const where: FindOptionsWhere<Message> = { chatId };
 
     if (cursor) {
-      where.id = LessThan(cursor);
+      where.id = LessThanOrEqual(cursor);
     }
 
     const messages = await this.messageRepo.find({
       where,
       order: { id: 'DESC' },
-      take: limit + 1,
+      take: limit + 1, // +1 to check if there's more
     });
 
     const hasMore = messages.length > limit;
-    if (hasMore) messages.pop();
+    const nextCursor = hasMore ? messages[messages.length - 1].id : null;
+    const finalMessages = hasMore ? messages.slice(0, -1) : messages;
 
     return {
-      messages: messages.map(mapMessageModel),
+      messages: finalMessages.map(mapMessageModel),
       hasMore,
-      nextCursor: hasMore ? messages[messages.length - 1].id : null,
-      total: messages.length,
+      nextCursor: nextCursor,
+      total: finalMessages.length,
     };
   }
 
@@ -73,6 +74,7 @@ export class MessageService {
     userId: string,
     chatId: string,
     messageId: string,
+    limit: number,
   ): Promise<Message[]> {
     // 1️⃣ Ensure user is member (keep your existing check)
 
@@ -88,7 +90,7 @@ export class MessageService {
     }
 
     const anchorId = messageId;
-    const limit = 10; // number of messages to load before and after
+    const tooWayLimit = Math.floor(limit / 2); // number of messages to load before and after
 
     // Load anchor itself
     const anchor = await this.messageRepo.findOne({
@@ -106,7 +108,7 @@ export class MessageService {
         id: LessThan(anchorId),
       },
       order: { id: 'DESC' },
-      take: limit,
+      take: tooWayLimit,
     });
 
     // Load newer messages (after anchor)
@@ -116,7 +118,7 @@ export class MessageService {
         id: MoreThan(anchorId),
       },
       order: { id: 'ASC' }, // important!
-      take: limit,
+      take: tooWayLimit,
     });
 
     return [

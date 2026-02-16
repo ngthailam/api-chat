@@ -62,26 +62,38 @@ export class MessageController {
 
   @Get('chat/:chatId/messages')
   @ApiParam({ name: 'chatId', required: true })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'limit', required: false })
   async findMessagesInChat(
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit: number = 20,
   ): Promise<MessageListResponse> {
-    const model = await this.messageService.findAllInChat(user.userId, chatId);
+    const model = await this.messageService.findAllInChat(
+      user.userId,
+      chatId,
+      +limit,
+      cursor,
+    );
     return mapMessageListModelToResponse(model);
   }
 
   @Get('chat/:chatId/messages/:messageId/surrounding')
   @ApiParam({ name: 'chatId', required: true })
   @ApiParam({ name: 'messageId', required: true })
+  @ApiQuery({ name: 'limit', required: false })
   findSurroundingMessages(
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Param('messageId') messageId: string,
+    @Query('limit') limit: number = 20,
   ) {
     return this.messageService.findSurroundingMessages(
       user.userId,
       chatId,
       messageId,
+      +limit,
     );
   }
 
