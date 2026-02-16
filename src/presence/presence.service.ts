@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { UserIdDeviceIdModel } from './model/userid-deviceid.model.js';
+import { UserIdDeviceId } from './model/userid-deviceid.model.js';
 
 @Injectable()
 export class PresenceService {
@@ -20,7 +20,7 @@ export class PresenceService {
     return `user:presence:${userId}:device:${deviceId}`;
   }
 
-  async markOnline(model: UserIdDeviceIdModel) {
+  async markOnline(model: UserIdDeviceId) {
     console.log('Marking online:', model);
 
     if (await this.isOnline(model)) {
@@ -38,21 +38,21 @@ export class PresenceService {
     );
   }
 
-  async refresh(model: UserIdDeviceIdModel) {
+  async refresh(model: UserIdDeviceId) {
     await this.redis.expire(
       this.buildKey(model.userId, model.deviceId),
       this.TTL,
     );
   }
 
-  async markOffline(model: UserIdDeviceIdModel): Promise<boolean> {
+  async markOffline(model: UserIdDeviceId): Promise<boolean> {
     const deleted = await this.redis.del(
       this.buildKey(model.userId, model.deviceId),
     );
     return deleted > 0;
   }
 
-  async isOnline(model: UserIdDeviceIdModel): Promise<boolean> {
+  async isOnline(model: UserIdDeviceId): Promise<boolean> {
     const exists = await this.redis.exists(
       this.buildKey(model.userId, model.deviceId),
     );
@@ -66,7 +66,7 @@ export class PresenceService {
    * @returns A record mapping input array index to their online status (true if online, false if offline)
    */
   async getOnlineStatuses(
-    userIdDeviceIdPair: UserIdDeviceIdModel[],
+    userIdDeviceIdPair: UserIdDeviceId[],
   ): Promise<Record<number, boolean>> {
     console.log(
       'PresenceService getOnlineStatuses called with:',

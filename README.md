@@ -55,3 +55,4 @@ node ./node_modules/typeorm/cli.js \
   -d dist/common/database/typeorm.config.js \
   migration:run
 
+node ./node_modules/typeorm/cli.js -d dist/common/database/typeorm.config.js migration:run

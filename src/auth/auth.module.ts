@@ -5,12 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { configConstants } from '../common/constants/config.constants.js';
 import { JwtStrategy } from '../common/strategy/jwt.strategy.js';
-import { User } from '../user/entities/user.entity.js';
+import { UserEntity } from '../user/entities/user.entity.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([UserEntity]),
     PassportModule,
     JwtModule.register({
       secret: configConstants.jwtSecret,

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { NotificationWithTokenModel } from '../../model/notification.model.js';
+import { NotificationWithToken } from '../../model/notification.model.js';
 
 @Injectable()
 export class FirebaseService {
@@ -13,7 +13,7 @@ export class FirebaseService {
     admin.auth().verifyIdToken(token);
   }
 
-  send(data: NotificationWithTokenModel) {
+  send(data: NotificationWithToken) {
     admin.messaging().send({
       token: data.token,
       notification: {
@@ -24,7 +24,7 @@ export class FirebaseService {
     });
   }
 
-  async sendToMany(messages: NotificationWithTokenModel[]) {
+  async sendToMany(messages: NotificationWithToken[]) {
     const BATCH_SIZE = 50; // safe concurrency (NOT Firebase limit)
 
     for (let i = 0; i < messages.length; i += BATCH_SIZE) {

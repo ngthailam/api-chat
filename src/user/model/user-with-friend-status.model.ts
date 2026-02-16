@@ -1,6 +1,6 @@
-import { User } from '../entities/user.entity.js';
+import { UserEntity } from '../entities/user.entity.js';
 
-export type UserWithFriendStatusModel = {
-  user: User;
+export class UserWithFriendStatus {
+  user: UserEntity;
   isFriend: boolean;
 };

@@ -1,6 +1,5 @@
-import { ChatMember } from '../entities/chat-member.js';
-import { Chat } from '../entities/chat.entity.js';
-import { ChatMemberDto } from './chat-member.dto.js';
+import { Chat } from '../model/chat.model.js';
+import { ChatMemberDto, mapChatMemberModelToDto } from './chat-member.dto.js';
 
 export class ChatDto {
   id: string;
@@ -8,12 +7,12 @@ export class ChatDto {
   name?: string;
 
   members: ChatMemberDto[];
+}
 
-  static fromEntity(entity: Chat, members: ChatMember[]): ChatDto {
-    const dto = new ChatDto();
-    dto.id = entity.id;
-    dto.name = entity.name;
-    dto.members = members.map((cm) => ChatMemberDto.fromEntity(cm));
-    return dto;
-  }
+export function mapChatModelToDto(chat: Chat): ChatDto {
+  const dto = new ChatDto();
+  dto.id = chat.id;
+  dto.name = chat.name;
+  dto.members = chat.members.map((cm) => mapChatMemberModelToDto(cm));
+  return dto;
 }

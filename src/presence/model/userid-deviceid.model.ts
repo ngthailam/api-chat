@@ -1,4 +1,4 @@
-export type UserIdDeviceIdModel = {
+export class UserIdDeviceId {
   userId: string;
   deviceId: string;
 }

@@ -1,4 +1,4 @@
-import { MessageModel } from '../model/message.model.js';
+import { Message } from '../model/message.model.js';
 import { ReactionType } from '../model/reaction-type.js';
 
 export type MessageResponse = {
@@ -27,7 +27,7 @@ export type ReactionResponse = {
 };
 
 export function mapMessageModelToMessageResponse(
-  model: MessageModel,
+  model: Message,
 ): MessageResponse {
   return {
     message: {

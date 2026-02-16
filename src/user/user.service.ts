@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity.js';
+import { UserEntity } from './entities/user.entity.js';
 import { ILike, Repository } from 'typeorm';
-import { UserWithFriendStatusModel } from './model/user-with-friend-status.model.js';
-import { Friend } from '../friend/entities/friend.entities.js';
+import { UserWithFriendStatus } from './model/user-with-friend-status.model.js';
+import { FriendEntity } from '../friend/entities/friend.entities.js';
 import { normalizeUserPair } from '../common/utils/misc.js';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private repo: Repository<User>,
-    @InjectRepository(Friend)
-    private friendRepo: Repository<Friend>,
+    @InjectRepository(UserEntity)
+    private repo: Repository<UserEntity>,
+    @InjectRepository(FriendEntity)
+    private friendRepo: Repository<FriendEntity>,
   ) {}
 
   findAll() {
@@ -22,7 +22,7 @@ export class UserService {
   async findOneWithFriendStatus(
     currentUserId: string,
     id: string,
-  ): Promise<UserWithFriendStatusModel> {
+  ): Promise<UserWithFriendStatus> {
     const user = await this.repo.findOneBy({ id });
     const { user1Id, user2Id } = normalizeUserPair(currentUserId, id);
 
@@ -42,7 +42,7 @@ export class UserService {
   async findByEmailWithFriendStatus(
     currentUserId: string,
     email: string,
-  ): Promise<UserWithFriendStatusModel[]> {
+  ): Promise<UserWithFriendStatus[]> {
     const users = await this.repo.find({
       where: {
         email: ILike(`%${email}%`),

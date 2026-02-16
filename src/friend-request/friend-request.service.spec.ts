@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { FriendRequestService } from './friend-request.service.js';
-import { FriendRequest } from './entities/friend-request.js';
+import { FriendRequestEntity } from './entities/friend-request.js';
 import { Repository } from 'typeorm';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
 
 describe('FriendRequestService', () => {
   let service: FriendRequestService;
-  let repository: Repository<FriendRequest>;
+  let repository: Repository<FriendRequestEntity>;
 
   const mockRepository = {
     find: jest.fn(),
@@ -22,15 +22,15 @@ describe('FriendRequestService', () => {
       providers: [
         FriendRequestService,
         {
-          provide: getRepositoryToken(FriendRequest),
+          provide: getRepositoryToken(FriendRequestEntity),
           useValue: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<FriendRequestService>(FriendRequestService);
-    repository = module.get<Repository<FriendRequest>>(
-      getRepositoryToken(FriendRequest),
+    repository = module.get<Repository<FriendRequestEntity>>(
+      getRepositoryToken(FriendRequestEntity),
     );
   });
 
@@ -47,7 +47,7 @@ describe('FriendRequestService', () => {
     const targetUserId = 'user-456';
 
     it('should throw BAD_REQUEST when friend request already exists (sender -> receiver)', async () => {
-      const existingRequest: Partial<FriendRequest> = {
+      const existingRequest: Partial<FriendRequestEntity> = {
         id: 1,
         senderId: userId,
         receiverId: targetUserId,
@@ -70,7 +70,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should throw BAD_REQUEST when friend request already exists (receiver -> sender)', async () => {
-      const existingRequest: Partial<FriendRequest> = {
+      const existingRequest: Partial<FriendRequestEntity> = {
         id: 1,
         senderId: targetUserId,
         receiverId: userId,
@@ -95,7 +95,7 @@ describe('FriendRequestService', () => {
     it('should successfully create friend request when no existing request', async () => {
       mockRepository.find.mockResolvedValue([]);
 
-      const savedRequest: Partial<FriendRequest> = {
+      const savedRequest: Partial<FriendRequestEntity> = {
         id: 1,
         senderId: userId,
         receiverId: targetUserId,
@@ -122,7 +122,7 @@ describe('FriendRequestService', () => {
     const userId = 'user-123';
 
     it('should return all friend requests where user is sender or receiver', async () => {
-      const requests: Partial<FriendRequest>[] = [
+      const requests: Partial<FriendRequestEntity>[] = [
         {
           id: 1,
           senderId: userId,
@@ -176,7 +176,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should throw BAD_REQUEST when user is not the sender', async () => {
-      const request: Partial<FriendRequest> = {
+      const request: Partial<FriendRequestEntity> = {
         id: requestId,
         senderId: 'another-user',
         receiverId: userId,
@@ -194,7 +194,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should successfully delete the request when user is sender', async () => {
-      const request: Partial<FriendRequest> = {
+      const request: Partial<FriendRequestEntity> = {
         id: requestId,
         senderId: userId,
         receiverId: 'user-456',
@@ -228,7 +228,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should throw BAD_REQUEST when user is not the receiver', async () => {
-      const request: Partial<FriendRequest> = {
+      const request: Partial<FriendRequestEntity> = {
         id: requestId,
         senderId: 'another-user',
         receiverId: 'user-456',
@@ -246,7 +246,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should successfully accept the request', async () => {
-      const request: Partial<FriendRequest> = {
+      const request: Partial<FriendRequestEntity> = {
         id: requestId,
         senderId: 'user-456',
         receiverId: userId,
@@ -281,7 +281,7 @@ describe('FriendRequestService', () => {
     });
 
     it('should successfully reject the request', async () => {
-      const request: Partial<FriendRequest> = {
+      const request: Partial<FriendRequestEntity> = {
         id: requestId,
         senderId: 'user-456',
         receiverId: userId,

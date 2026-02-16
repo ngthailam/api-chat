@@ -1,17 +1,17 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserToken } from './entity/user-token.entity.js';
+import { UserTokenEntity } from './entity/user-token.entity.js';
 import { UpdateUserTokenDto } from './dto/update-user-token.dto.js';
 import { RegisterUserTokenDto } from './dto/register-user-token.dto.js';
 import { FirebaseService } from '../notification/providers/firebase/firebase.service.js';
-import { NotificationModel } from './model/notification.model.js';
+import { Notification } from './model/notification.model.js';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectRepository(UserToken)
-    private readonly notificationRepo: Repository<UserToken>,
+    @InjectRepository(UserTokenEntity)
+    private readonly notificationRepo: Repository<UserTokenEntity>,
     @Inject()
     private readonly firebaseService: FirebaseService,
   ) {}
@@ -25,7 +25,7 @@ export class NotificationService {
   async sendNotification(
     userId: string,
     deviceId: string,
-    data: NotificationModel,
+    data: Notification,
   ) {
     const token = await this.notificationRepo.findOne({
       where: {
@@ -72,7 +72,7 @@ export class NotificationService {
     }
 
     // Create new entry
-    const userToken = new UserToken();
+    const userToken = new UserTokenEntity();
     userToken.userId = userId;
     userToken.deviceId = deviceId;
     userToken.token = request.token;

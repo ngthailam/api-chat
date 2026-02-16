@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FriendRequest } from './entities/friend-request.js';
+import { FriendRequestEntity } from './entities/friend-request.js';
 import { Repository } from 'typeorm';
 import { FriendService } from '../friend/friend.service.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
@@ -9,8 +9,8 @@ import { CustomErrors } from '../common/errors/error_codes.js';
 @Injectable()
 export class FriendRequestService {
   constructor(
-    @InjectRepository(FriendRequest)
-    private readonly friendRequestRepo: Repository<FriendRequest>,
+    @InjectRepository(FriendRequestEntity)
+    private readonly friendRequestRepo: Repository<FriendRequestEntity>,
     private readonly friendService: FriendService,
   ) {}
 
@@ -32,7 +32,7 @@ export class FriendRequestService {
       throw new CustomException(CustomErrors.FR_ALREADY_EXIST);
     }
 
-    const friendRequestEntity = new FriendRequest();
+    const friendRequestEntity = new FriendRequestEntity();
     friendRequestEntity.senderId = userId;
     friendRequestEntity.receiverId = targetUserId;
     friendRequestEntity.createdAt = new Date();

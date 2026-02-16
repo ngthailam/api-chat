@@ -1,8 +1,8 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn, Unique } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'user_tokens' })
 @Unique(['userId', 'deviceId'])
-export class UserToken {
+export class UserTokenEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

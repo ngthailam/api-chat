@@ -1,6 +1,4 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -8,30 +6,29 @@ import {
 } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto.js';
 import { In, Not, Repository } from 'typeorm';
-import { Chat } from './entities/chat.entity.js';
-import { User } from '../user/entities/user.entity.js';
+import { ChatEntity } from './entities/chat.entity.js';
+import { UserEntity } from '../user/entities/user.entity.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChatMember } from './entities/chat-member.js';
-import { ChatDto } from './dto/chat.dto.js';
-import { ChatMemberDto } from './dto/chat-member.dto.js';
+import { ChatMemberEntity } from './entities/chat-member.entity.js';
 import { ChatType } from './dto/chat-type.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
+import { Chat, mapChatEntityToModel } from './model/chat.model.js';
 
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectRepository(Chat)
-    private readonly chatRepo: Repository<Chat>,
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-    @InjectRepository(ChatMember)
-    private readonly chatMemberRepo: Repository<ChatMember>,
+    @InjectRepository(ChatEntity)
+    private readonly chatRepo: Repository<ChatEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(ChatMemberEntity)
+    private readonly chatMemberRepo: Repository<ChatMemberEntity>,
   ) {}
 
   private readonly logger = new Logger(ChatService.name);
 
-  async create(userId: string, createChatDto: CreateChatDto) {
+  async create(userId: string, createChatDto: CreateChatDto): Promise<Chat> {
     if (createChatDto.type == ChatType.ONE_ONE) {
       if (createChatDto.memberIds.length != 1) {
         throw new CustomException(CustomErrors.CHAT_INVALID_MEM_COUNT);
@@ -43,15 +40,19 @@ export class ChatService {
       );
       if (existingChat) {
         this.logger.log(`Chat already exist ${existingChat}`);
-        return existingChat;
+        return mapChatEntityToModel(existingChat);
       }
     }
 
-    const chat = this.chatRepo.create();
+    // Creating chat
+    const chat: ChatEntity = this.chatRepo.create();
     if (createChatDto.type != ChatType.ONE_ONE) {
       chat.name = createChatDto.name;
     }
+    chat.type = createChatDto.type;
     const savedChat = await this.chatRepo.save(chat);
+
+    // Adding members
     const membersToAdd = createChatDto.memberIds || [];
     if (!membersToAdd.includes(userId)) {
       membersToAdd.push(userId);
@@ -66,7 +67,7 @@ export class ChatService {
     );
 
     const chatMembers = members.map((member) => {
-      const chatMember = new ChatMember();
+      const chatMember = new ChatMemberEntity();
       chatMember.chat = savedChat;
       chatMember.member = member;
       chatMember.role = member.id === userId ? 'admin' : 'member';
@@ -75,7 +76,7 @@ export class ChatService {
 
     await this.chatMemberRepo.save(chatMembers);
 
-    return ChatDto.fromEntity(savedChat, chatMembers);
+    return mapChatEntityToModel(savedChat, chatMembers);
   }
 
   async findExistingOneToOneChat(
@@ -87,7 +88,7 @@ export class ChatService {
       relations: ['member', 'chat'],
     });
 
-    let targetChat: Chat | null = null;
+    let targetChat: ChatEntity | null = null;
 
     chatMembers.forEach(async (e) => {
       const chatId = e.chat.id;
@@ -104,26 +105,26 @@ export class ChatService {
       }
     });
 
-    return targetChat;
+    return mapChatEntityToModel(targetChat);
   }
 
-  async findAll() {
+  async findAll(): Promise<Chat[]> {
     const chatEntities = await this.chatRepo.find();
-    const chatDtos = await Promise.all(
+    const chats: Chat[] = await Promise.all(
       chatEntities.map(async (chat) => {
         const chatMembers = await this.chatMemberRepo.find({
           where: { chat: { id: chat.id } },
           relations: ['member'],
         });
 
-        return ChatDto.fromEntity(chat, chatMembers);
+        return mapChatEntityToModel(chat, chatMembers);
       }),
     );
 
-    return chatDtos;
+    return chats;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Chat> {
     const chat = await this.chatRepo.findOne({ where: { id } });
     if (!chat) {
       throw new NotFoundException(`Chat with id ${id} not found`);
@@ -132,10 +133,14 @@ export class ChatService {
       where: { chat: { id: chat.id } },
       relations: ['member'],
     });
-    return ChatDto.fromEntity(chat, chatMembers);
+    return mapChatEntityToModel(chat, chatMembers);
   }
 
-  async addMembers(currentUserId: string, chatId: string, memberIds: string[]) {
+  async addMembers(
+    currentUserId: string,
+    chatId: string,
+    memberIds: string[],
+  ): Promise<void> {
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
       throw new NotFoundException(`Chat with id ${chatId} not found`);
@@ -166,7 +171,7 @@ export class ChatService {
     const chatMembers = members
       .filter((member) => member.id! in existingMemberIds)
       .map((member) => {
-        const chatMember = new ChatMember();
+        const chatMember = new ChatMemberEntity();
         chatMember.chat = chat;
         chatMember.member = member;
         chatMember.role = 'member';
@@ -174,10 +179,13 @@ export class ChatService {
       });
 
     const savedChatMembers = await this.chatMemberRepo.save(chatMembers);
-    return savedChatMembers.map((cm) => ChatMemberDto.fromEntity(cm));
   }
 
-  async removeMember(currentUserId: string, chatId: string, memberId: string) {
+  async removeMember(
+    currentUserId: string,
+    chatId: string,
+    memberId: string,
+  ): Promise<void> {
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
         chat: { id: chatId },
@@ -211,10 +219,13 @@ export class ChatService {
     }
 
     await this.chatMemberRepo.delete(chatMember.id);
-    return ChatMemberDto.fromEntity(chatMember);
   }
 
-  async renameChat(currentUserId: string, id: string, newName: string) {
+  async renameChat(
+    currentUserId: string,
+    id: string,
+    newName: string,
+  ): Promise<Chat> {
     const chatMembers = await this.chatMemberRepo.find({
       where: {
         chat: { id: id },
@@ -226,10 +237,19 @@ export class ChatService {
       throw new CustomException(CustomErrors.CHAT_NOT_MEMBER);
     }
 
-    return this.chatRepo.update({ id }, { name: newName });
+    const chat = await this.chatRepo.findOneBy({ id });
+
+    if (!chat) {
+      throw new NotFoundException();
+    }
+
+    chat.name = newName;
+
+    const savedChat = await this.chatRepo.save(chat);
+    return mapChatEntityToModel(savedChat);
   }
 
-  async remove(currentUserId: string, id: string) {
+  async remove(currentUserId: string, id: string): Promise<void> {
     const currentUserMember = await this.getMemberInChat(id, currentUserId, [
       'member',
     ]);
@@ -242,18 +262,18 @@ export class ChatService {
       throw new UnauthorizedException('Only admins can delete the chat');
     }
 
-    return this.chatRepo.delete({ id });
+    await this.chatRepo.delete({ id });
   }
 
-  async removeAll() {
-    return this.chatRepo.deleteAll();
+  async removeAll(): Promise<void> {
+    await this.chatRepo.deleteAll();
   }
 
   async getMemberInChat(
     chatId: string,
     memberId: string,
     relations: string[] = ['member', 'chat'],
-  ): Promise<ChatMember | null> {
+  ): Promise<ChatMemberEntity | null> {
     const chatMember = await this.chatMemberRepo.findOne({
       where: {
         chat: { id: chatId },

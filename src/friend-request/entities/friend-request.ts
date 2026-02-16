@@ -1,10 +1,10 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'friend_requests' })
 @Index('unique_friend_request_pair', ['senderId', 'receiverId'], {
   unique: true,
 })
-export class FriendRequest {
+export class FriendRequestEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

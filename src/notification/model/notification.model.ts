@@ -1,10 +1,10 @@
-export type NotificationModel = {
+export class Notification {
   title: string;
   body: string;
   data?: Record<string, string> | null;
-};
+}
 
-export type NotificationWithTokenModel = {
+export class NotificationWithToken {
   token: string;
-  notification: NotificationModel;
-};
+  notification: Notification;
+}

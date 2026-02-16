@@ -1,5 +1,5 @@
-import { User } from '../entities/user.entity.js';
-import { UserWithFriendStatusModel } from '../model/user-with-friend-status.model.js';
+import { UserEntity } from '../entities/user.entity.js';
+import { UserWithFriendStatus } from '../model/user-with-friend-status.model.js';
 
 export class UserDto {
   id: string;
@@ -8,7 +8,7 @@ export class UserDto {
 
   isFriend?: boolean;
 
-  static fromEntity(user: User, isFriend: boolean = null): UserDto {
+  static fromEntity(user: UserEntity, isFriend: boolean = null): UserDto {
     const userDto = new UserDto();
 
     userDto.id = user.id;
@@ -19,7 +19,7 @@ export class UserDto {
   }
 
   static fromUserWithFriendStatusModel(
-    model: UserWithFriendStatusModel,
+    model: UserWithFriendStatus,
   ): UserDto {
     const userDto = new UserDto();
 

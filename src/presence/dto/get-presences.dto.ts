@@ -1,6 +1,6 @@
-import { UserIdDeviceIdModel } from "../model/userid-deviceid.model.js";
+import { UserIdDeviceId } from "../model/userid-deviceid.model.js";
 
 export class GetPresenecsDto {
-  userIdDeviceIdPairs: UserIdDeviceIdModel[];
+  userIdDeviceIdPairs: UserIdDeviceId[];
 }
 

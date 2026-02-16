@@ -9,11 +9,11 @@ import {
   Repository,
 } from 'typeorm';
 import { MessageEntity } from './entities/message.entity.js';
-import { ChatMember } from '../chat/entities/chat-member.js';
+import { ChatMemberEntity } from '../chat/entities/chat-member.entity.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
 import { UpdateMessageDto } from './dto/update-message.dto.js';
-import { mapMessageModel, MessageModel } from './model/message.model.js';
+import { mapMessageModel, Message } from './model/message.model.js';
 import { MessageListModel } from './model/message-list.model.js';
 
 @Injectable()
@@ -21,8 +21,8 @@ export class MessageService {
   constructor(
     @InjectRepository(MessageEntity)
     private readonly messageRepo: Repository<MessageEntity>,
-    @InjectRepository(ChatMember)
-    private readonly chatMemberRepo: Repository<ChatMember>,
+    @InjectRepository(ChatMemberEntity)
+    private readonly chatMemberRepo: Repository<ChatMemberEntity>,
   ) {}
 
   private logger = new Logger(MessageService.name);
@@ -31,7 +31,7 @@ export class MessageService {
     return this.messageRepo.findOne({ where: { id: messageId } });
   }
 
-  async findAll(): Promise<MessageModel[]> {
+  async findAll(): Promise<Message[]> {
     const messages = await this.messageRepo.find();
     return messages.map((e) => mapMessageModel(e));
   }
@@ -197,7 +197,7 @@ export class MessageService {
     userId: string,
     messageId: string,
     request: UpdateMessageDto,
-  ): Promise<MessageModel | null> {
+  ): Promise<Message | null> {
     const message = await this.findOne(messageId);
 
     if (userId != message.senderId) {

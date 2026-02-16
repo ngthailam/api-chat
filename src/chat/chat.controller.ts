@@ -12,6 +12,7 @@ import { ChatService } from './chat.service.js';
 import { CreateChatDto } from './dto/create-chat.dto.js';
 import { CurrentUser } from '../common/decorator/current-user.decorator.js';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ChatDto, mapChatModelToDto } from './dto/chat.dto.js';
 
 @ApiTags('Chat')
 @Controller('chat')
@@ -19,18 +20,24 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Post()
-  create(@CurrentUser() user: any, @Body() createChatDto: CreateChatDto) {
-    return this.chatService.create(user.userId, createChatDto);
+  async create(
+    @CurrentUser() user: any,
+    @Body() createChatDto: CreateChatDto,
+  ): Promise<ChatDto> {
+    const model = await this.chatService.create(user.userId, createChatDto);
+    return mapChatModelToDto(model);
   }
 
   @Get()
-  findAll() {
-    return this.chatService.findAll();
+  async findAll(): Promise<ChatDto[]> {
+    const chats = await this.chatService.findAll();
+    return chats.map((chat) => mapChatModelToDto(chat));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chatService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<ChatDto> {
+    const chat = await this.chatService.findOne(id);
+    return mapChatModelToDto(chat);
   }
 
   @Post(':id/members')
@@ -43,7 +50,7 @@ export class ChatController {
     @CurrentUser() user: any,
     @Param('id') id: string,
     @Body('memberIds') memberIds: string[],
-  ) {
+  ): Promise<void> {
     return this.chatService.addMembers(user.userId, id, memberIds);
   }
 
@@ -52,26 +59,27 @@ export class ChatController {
     @CurrentUser() user: any,
     @Param('id') id: string,
     @Param('memberId') memberId: string,
-  ) {
+  ): Promise<void> {
     return this.chatService.removeMember(user.userId, id, memberId);
   }
 
   @Patch(':id/rename')
-  renameChat(
+  async renameChat(
     @CurrentUser() user: any,
     @Param('id') id: string,
     @Body('newName') newName: string,
-  ) {
-    return this.chatService.renameChat(user.userId, id, newName);
+  ): Promise<ChatDto> {
+    const chat = await this.chatService.renameChat(user.userId, id, newName);
+    return mapChatModelToDto(chat);
   }
 
   @Delete(':id')
-  remove(@CurrentUser() user: any, @Param('id') id: string) {
+  remove(@CurrentUser() user: any, @Param('id') id: string): Promise<void> {
     return this.chatService.remove(user.userId, id);
   }
 
   @Delete('dev/delete/all')
-  removeAll() {
+  removeAll(): Promise<void> {
     return this.chatService.removeAll();
   }
 }

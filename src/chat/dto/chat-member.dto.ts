@@ -1,20 +1,17 @@
-import { ChatMember } from '../entities/chat-member.js';
+import { ChatMember } from '../model/chat-member.model.js';
 
 export class ChatMemberDto {
-  id: string;
-
-  email: string;
+  id: number;
 
   nickName?: string;
 
   role: 'admin' | 'member';
+}
 
-  static fromEntity(cm: ChatMember): ChatMemberDto {
-    const chatMemberDto = new ChatMemberDto();
-    chatMemberDto.id = cm.member.id;
-    chatMemberDto.email = cm.member.email;
-    chatMemberDto.nickName = cm.nickName;
-    chatMemberDto.role = cm.role;
-    return chatMemberDto;
-  }
+export function mapChatMemberModelToDto(cm: ChatMember): ChatMemberDto {
+  const chatMemberDto = new ChatMemberDto();
+  chatMemberDto.id = cm.id;
+  chatMemberDto.nickName = cm.nickName;
+  chatMemberDto.role = cm.role;
+  return chatMemberDto;
 }

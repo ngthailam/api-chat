@@ -9,9 +9,9 @@ import {
 /**
  * To save resource, user1 and user2 ids will be sorted (user1Id > user2Id in terms of string comparison)
  */
-@Entity()
+@Entity({ name: 'friends' })
 @Index(['user1Id', 'user2Id'], { unique: true })
-export class Friend {
+export class FriendEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

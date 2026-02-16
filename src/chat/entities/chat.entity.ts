@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ChatType } from '../dto/chat-type.js';
 
-@Entity()
-export class Chat {
+@Entity({ name: 'chats' })
+export class ChatEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
