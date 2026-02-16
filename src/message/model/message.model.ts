@@ -1,4 +1,4 @@
-import { Message } from '../entities/message.entity.js';
+import { MessageEntity } from '../entities/message.entity.js';
 import { ReactionType } from './reaction-type.js';
 
 export type MessageModel = {
@@ -21,7 +21,7 @@ export type MessageQuoteModel = {
   text: string;
 }
 
-export function mapMessageModel(message: Message): MessageModel {
+export function mapMessageModel(message: MessageEntity): MessageModel {
   return {
     message: {
       id: message.id,
@@ -70,7 +70,7 @@ export function mapReactionsToModel(
 
   return { count, sender };
 }
-function mapQuoteToModel(message: Message): MessageQuoteModel | null {
+function mapQuoteToModel(message: MessageEntity): MessageQuoteModel | null {
   if (!message.quoteMessageId) {
     return null;
   }

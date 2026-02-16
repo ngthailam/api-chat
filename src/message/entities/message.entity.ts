@@ -1,16 +1,11 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  PrimaryColumn,
-} from 'typeorm';
+import { BeforeInsert, Column, Entity, Index, PrimaryColumn } from 'typeorm';
 import { v7 as uuidv7 } from 'uuid';
 import { ReactionType } from '../model/reaction-type.js';
+import { MessageType } from '../model/message-type.js';
 
-@Entity()
+@Entity({ name: 'messages' })
 @Index(['chatId', 'id'])
-export class Message {
+export class MessageEntity {
   @PrimaryColumn('uuid')
   id: string;
 
@@ -53,4 +48,10 @@ export class Message {
 
   @Column({ default: null, nullable: true })
   quoteMessageText: string | null;
+
+  @Column({ type: 'enum', enum: MessageType })
+  type: MessageType;
+
+  @Column({ type: 'jsonb', default: {} })
+  extraData?: Record<string, any>;
 }

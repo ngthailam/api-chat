@@ -32,6 +32,7 @@
 [] Move messages to nosql ?
 [] Restructer the Model, Entity, Dto, Response thing
 [x] API to load surrounding message (for search/ quote) (do after pagination)
+[] Create poll in chat
 
 
 ## Bug

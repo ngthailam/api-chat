@@ -47,4 +47,11 @@ test:cov
 
 ### Migration:
 
-node ./node_modules/typeorm/cli.js -d dist/common/database/typeorm.config.js migration:generate ./src/common/database/migrations/add-col-user-username
+## Create migration
+npx typeorm migration:create src/common/database/migrations/update-table-name-messages
+
+## Run migration
+node ./node_modules/typeorm/cli.js \
+  -d dist/common/database/typeorm.config.js \
+  migration:run
+

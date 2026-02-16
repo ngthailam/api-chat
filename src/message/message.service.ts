@@ -8,7 +8,7 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
-import { Message } from './entities/message.entity.js';
+import { MessageEntity } from './entities/message.entity.js';
 import { ChatMember } from '../chat/entities/chat-member.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
@@ -19,15 +19,15 @@ import { MessageListModel } from './model/message-list.model.js';
 @Injectable()
 export class MessageService {
   constructor(
-    @InjectRepository(Message)
-    private readonly messageRepo: Repository<Message>,
+    @InjectRepository(MessageEntity)
+    private readonly messageRepo: Repository<MessageEntity>,
     @InjectRepository(ChatMember)
     private readonly chatMemberRepo: Repository<ChatMember>,
   ) {}
 
   private logger = new Logger(MessageService.name);
 
-  async findOne(messageId: string): Promise<Message> {
+  async findOne(messageId: string): Promise<MessageEntity> {
     return this.messageRepo.findOne({ where: { id: messageId } });
   }
 
@@ -45,7 +45,7 @@ export class MessageService {
   ): Promise<MessageListModel> {
     await this.ensureChatMember(userId, chatId);
 
-    const where: FindOptionsWhere<Message> = { chatId };
+    const where: FindOptionsWhere<MessageEntity> = { chatId };
 
     if (cursor) {
       where.id =
@@ -179,7 +179,7 @@ export class MessageService {
     text: string,
     quoteMessageId?: string | null,
     quoteMessageText?: string | null,
-  ): Promise<Message> {
+  ): Promise<MessageEntity> {
     this.ensureChatMember(senderId, chatId); // throws if not member
 
     const message = this.messageRepo.create({
@@ -224,7 +224,7 @@ export class MessageService {
     userId: string,
     chatId: string,
     keyword: string,
-  ): Promise<Message[]> {
+  ): Promise<MessageEntity[]> {
     this.ensureChatMember(userId, chatId); // throws if not member
 
     return this.messageRepo

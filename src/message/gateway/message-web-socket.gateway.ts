@@ -10,7 +10,7 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { HttpException } from '@nestjs/common';
 import { MessageService } from '../message.service.js';
-import { Message } from '../entities/message.entity.js';
+import { MessageEntity } from '../entities/message.entity.js';
 import { WsAuthGuard } from '../../common/guard/ws-auth.guard.js';
 import { WsCurrentUserDecorator } from '../../common/decorator/ws-current-user.decorator.js';
 
@@ -51,7 +51,7 @@ export class MessageWebSocketGateway {
     }
 
     try {
-      const result: Message = await this.messageService.createMessage(
+      const result: MessageEntity = await this.messageService.createMessage(
         chatId,
         senderId,
         text,

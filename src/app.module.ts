@@ -15,25 +15,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DeviceIdGuard } from './common/guard/device-id.guard.js';
 import { PresenceModule } from './presence/presence.module.js';
 import { RedisModule } from './redis/redis.module.js';
+import { typeOrmConfig } from './common/database/typeorm.config.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'), // default Postgres port
-        username: configService.get<string>('DATABASE_USER'),
-        password: configService.get<string>('DATABASE_PASSWORD'), // if you haven’t set one
-        database: configService.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        retryAttempts: 3,
-        migrations: ['dist/common/database/migrations/*.js'],
-        migrationsTableName: 'migrations',
-        synchronize: false,
-      }),
-      inject: [ConfigService],
+    TypeOrmModule.forRoot({
+      ...typeOrmConfig,
+      autoLoadEntities: true, // only here
+      retryAttempts: 3, // only here
     }),
     UserModule,
     ChatModule,
@@ -60,3 +49,6 @@ import { RedisModule } from './redis/redis.module.js';
   ],
 })
 export class AppModule {}
+
+console.log(process.env.DATABASE_NAME);
+
