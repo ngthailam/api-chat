@@ -103,8 +103,6 @@ class MessageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ChatController>();
-
     return Align(
       alignment: isOwnMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(

@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FriendRequestEntity } from './entities/friend-request.js';
+import { FriendRequestEntity } from './entities/friend-request.entity.js';
 import { Repository } from 'typeorm';
 import { FriendService } from '../friend/friend.service.js';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
+import { FriendRequest, mapFriendRequestEntityToModel } from './model/friend-request.model.js';
 
 @Injectable()
 export class FriendRequestService {
@@ -14,7 +15,7 @@ export class FriendRequestService {
     private readonly friendService: FriendService,
   ) {}
 
-  async createFriendRequest(userId: string, targetUserId: string) {
+  async createFriendRequest(userId: string, targetUserId: string): Promise<FriendRequest> {
     const existingFriendRequest = await this.friendRequestRepo.find({
       where: [
         {
@@ -37,16 +38,18 @@ export class FriendRequestService {
     friendRequestEntity.receiverId = targetUserId;
     friendRequestEntity.createdAt = new Date();
 
-    return this.friendRequestRepo.save(friendRequestEntity);
+    const savedEntity = await this.friendRequestRepo.save(friendRequestEntity);
+    return mapFriendRequestEntityToModel(savedEntity);
   }
 
-  findAllRelatingUser(userId: string) {
-    return this.friendRequestRepo.find({
+  async findAllByFromUser(userId: string): Promise<FriendRequest[]> {
+    const entities = await this.friendRequestRepo.find({
       where: [{ receiverId: userId }, { senderId: userId }],
     });
+    return entities.map(mapFriendRequestEntityToModel);
   }
 
-  async remove(userId: string, requestId: number) {
+  async remove(userId: string, requestId: number): Promise<void> {
     const request = await this.friendRequestRepo.findOneBy({ id: requestId });
 
     if (!request) {
@@ -57,14 +60,14 @@ export class FriendRequestService {
       throw new CustomException(CustomErrors.FR_NOT_OWNER);
     }
 
-    return this.friendRequestRepo.delete({ id: requestId });
+    await this.friendRequestRepo.delete({ id: requestId });
   }
 
   async respondToFriendRequest(
     userId: string,
     requestId: number,
     response: 'accept' | 'reject',
-  ) {
+  ): Promise<FriendRequest> {
     const request = await this.friendRequestRepo.findOneBy({ id: requestId });
 
     if (!request) {
@@ -82,6 +85,6 @@ export class FriendRequestService {
     // Create a friend relationship
     await this.friendService.create(request.senderId, request.receiverId);
 
-    return savedRequest;
+    return mapFriendRequestEntityToModel(savedRequest);
   }
 }

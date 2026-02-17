@@ -4,7 +4,6 @@ import 'package:demoweb/data/models/chat_messages_response.dart';
 import 'package:demoweb/data/models/presence_request.dart';
 import 'package:demoweb/data/models/user_model.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'api_service.g.dart';

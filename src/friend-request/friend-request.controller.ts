@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { FriendRequestService } from './friend-request.service.js';
 import { CurrentUser } from '../common/decorator/current-user.decorator.js';
-import { ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { RespondFriendRequestDto } from './dto/respond-friend-request.dto.js';
+import { FriendRequestDto, mapFriendRequestModelToDto } from './dto/friend-request.dto.js';
 
-@Controller('friend-request')
 @ApiTags('Friend Request')
+@Controller('friend-request')
 export class FriendRequestController {
   constructor(private readonly friendRequestService: FriendRequestService) {}
 
@@ -29,14 +30,15 @@ export class FriendRequestController {
    * other APIs on friend requests will be based on that
    */
   @Post('users/:targetUserId/friend-requests')
-  createFriendRequest(
+  async createFriendRequest(
     @CurrentUser() user: { userId: string },
     @Param('targetUserId') targetUserId: string,
-  ) {
-    return this.friendRequestService.createFriendRequest(
+  ): Promise<FriendRequestDto> {
+    const model = await this.friendRequestService.createFriendRequest(
       user.userId,
       targetUserId,
     );
+    return mapFriendRequestModelToDto(model);
   }
 
   /**
@@ -45,8 +47,9 @@ export class FriendRequestController {
    * @param user current user
    */
   @Get('friend-requests')
-  async getAllFriendRequests(@CurrentUser() user: { userId: string }) {
-    return this.friendRequestService.findAllRelatingUser(user.userId);
+  async getAllFriendRequests(@CurrentUser() user: { userId: string }): Promise<FriendRequestDto[]> {
+    const models = await this.friendRequestService.findAllByFromUser(user.userId);
+    return models.map(mapFriendRequestModelToDto);
   }
 
   /**
@@ -59,8 +62,8 @@ export class FriendRequestController {
   async revokeFriendRequest(
     @CurrentUser() user: { userId: string },
     @Param('requestId') requestId: string,
-  ) {
-    return this.friendRequestService.remove(user.userId, +requestId);
+  ): Promise<void> {
+    await this.friendRequestService.remove(user.userId, +requestId);
   }
 
   /**
@@ -74,11 +77,12 @@ export class FriendRequestController {
     @CurrentUser() user: { userId: string },
     @Param('requestId') requestId: string,
     @Body() request: RespondFriendRequestDto,
-  ) {
-    return this.friendRequestService.respondToFriendRequest(
+  ): Promise<FriendRequestDto> {
+    const model = await this.friendRequestService.respondToFriendRequest(
       user.userId,
       +requestId,
       request.response,
     );
+    return mapFriendRequestModelToDto(model);
   }
 }

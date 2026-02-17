@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { FriendRequestService } from './friend-request.service.js';
-import { FriendRequestEntity } from './entities/friend-request.js';
+import { FriendRequestEntity } from './entities/friend-request.entity.js';
 import { Repository } from 'typeorm';
 import { CustomException } from '../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../common/errors/error_codes.js';
@@ -141,7 +141,7 @@ describe('FriendRequestService', () => {
 
       mockRepository.find.mockResolvedValue(requests);
 
-      const result = await service.findAllRelatingUser(userId);
+      const result = await service.findAllByFromUser(userId);
 
       expect(result).toEqual(requests);
       expect(mockRepository.find).toHaveBeenCalledWith({
@@ -152,7 +152,7 @@ describe('FriendRequestService', () => {
     it('should return empty array when no friend requests exist', async () => {
       mockRepository.find.mockResolvedValue([]);
 
-      const result = await service.findAllRelatingUser(userId);
+      const result = await service.findAllByFromUser(userId);
 
       expect(result).toEqual([]);
       expect(mockRepository.find).toHaveBeenCalledWith({
