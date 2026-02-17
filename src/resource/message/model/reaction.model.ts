@@ -15,7 +15,7 @@ export class Reaction {
   sender: Record<string, ReactionType>;
 }
 
-export function mapReactionsToModel(
+export function mapReactionsEntityToModel(
   reactions: Record<string, ReactionType> | null | undefined,
 ): Reaction {
   const count = {} as Record<ReactionType, number>;

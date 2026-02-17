@@ -30,9 +30,9 @@
 [] Add version control (v1 v2 ?)
 [] CI/CD Auto deploy/host somewhere
 [] Move messages to nosql ?
-[] Restructer the Model, Entity, Dto, Response thing
+[x] Restructer the Model, Entity, Dto, Response thing
 [x] API to load surrounding message (for search/ quote) (do after pagination)
-[] Create poll in chat
+[x] Create poll in chat
 
 
 ## Bug

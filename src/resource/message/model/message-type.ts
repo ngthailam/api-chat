@@ -1,4 +1,4 @@
 export enum MessageType {
-  TEXT = 'text',
-  POLL = 'poll',
+  TEXT = 'TEXT',
+  POLL = 'POLL',
 }

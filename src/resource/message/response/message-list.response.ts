@@ -1,6 +1,6 @@
-import { MessageListModel } from '../model/message-list.model.js';
+import { MessageList } from '../model/message-list.model.js';
 import {
-  mapMessageModelToMessageResponse,
+  mapMessageModelToResponse,
   MessageResponse,
 } from './message.response.js';
 
@@ -12,10 +12,10 @@ export type MessageListResponse = {
 };
 
 export function mapMessageListModelToResponse(
-  model: MessageListModel,
+  model: MessageList,
 ): MessageListResponse {
   return {
-    messages: model.messages.map(mapMessageModelToMessageResponse),
+    messages: model.messages.map(mapMessageModelToResponse),
     hasMore: model.hasMore,
     nextCursor: model.nextCursor,
     total: model.total,

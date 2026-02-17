@@ -1,19 +1,34 @@
-import { Message } from '../model/message.model.js';
+import { MessageType } from '../model/message-type.js';
+import {
+  Message,
+  MessageBasicInfo,
+  MessageQuote,
+} from '../model/message.model.js';
 import { ReactionType } from '../model/reaction-type.js';
+import { Reaction } from '../model/reaction.model.js';
+import {
+  mapPollMessageModelToResponse,
+  PollMessageResponse,
+} from './poll/message-poll.response.js';
+import {
+  mapTextMessageModelToResponse,
+  TextMessageResponse,
+} from './text/message-text.response.js';
 
-export type MessageResponse = {
-  message: MessageBasicInfoResponse;
-  reaction: ReactionResponse;
+export type MessageResponse = TextMessageResponse | PollMessageResponse;
+///
+export interface BaseMessageResponse {
+  info: MessageBasicInfoResponse;
+  reaction: MessageReactionResponse;
   quote?: MessageQuoteResponse;
-};
+}
 
-export type MessageBasicInfoResponse = {
+export class MessageBasicInfoResponse {
   id: string;
-  text: string;
-  senderId: string;
   chatId: string;
+  senderId: string;
   createdAt: Date;
-};
+}
 
 export type MessageQuoteResponse = {
   type: 'text';
@@ -21,30 +36,52 @@ export type MessageQuoteResponse = {
   text: string;
 };
 
-export type ReactionResponse = {
+export type MessageReactionResponse = {
   count: Record<ReactionType, number>;
   sender: Record<string, ReactionType>;
 };
 
-export function mapMessageModelToMessageResponse(
-  model: Message,
-): MessageResponse {
+export function mapMessageModelToResponse(message: Message): MessageResponse {
+  switch (message.type) {
+    case MessageType.TEXT:
+      return mapTextMessageModelToResponse(message);
+    case MessageType.POLL:
+      return mapPollMessageModelToResponse(message);
+    default:
+      throw new Error(`Unsupported message type: ${message}`);
+  }
+}
+
+export function mapMessageInfoModelToRespone(
+  message: MessageBasicInfo,
+): MessageBasicInfoResponse {
   return {
-    message: {
-      id: model.message.id,
-      text: model.message.text,
-      senderId: model.message.senderId,
-      chatId: model.message.chatId,
-      createdAt: model.message.createdAt,
-    },
-    reaction: {
-      count: model.reaction.count,
-      sender: model.reaction.sender,
-    },
-    quote: {
-      type: model.quote?.type,
-      messageId: model.quote?.messageId,
-      text: model.quote?.text,
-    }
+    id: message.id,
+    senderId: message.senderId,
+    chatId: message.chatId,
+    createdAt: message.createdAt,
+  };
+}
+
+export function mapReactionsModelToResponse(
+  reaction: Reaction,
+): MessageReactionResponse {
+  return {
+    count: reaction.count,
+    sender: reaction.sender,
+  };
+}
+
+export function mapQuoteModelToResponse(
+  quote: MessageQuote,
+): MessageQuoteResponse | null {
+  if (!quote.messageId) {
+    return null;
+  }
+
+  return {
+    type: 'text',
+    messageId: quote.messageId,
+    text: quote.text,
   };
 }

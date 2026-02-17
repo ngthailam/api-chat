@@ -28,7 +28,6 @@ export class MessageController {
     return this.messageService.findAll();
   }
 
-  // TODO: remove this API, it's for testing
   @Post('chat/:chatId/messages')
   @ApiBody({
     schema: {
@@ -41,7 +40,7 @@ export class MessageController {
       required: ['text'],
     },
   })
-  createMessage(
+  createTextMessage(
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Body()
@@ -51,12 +50,63 @@ export class MessageController {
       quoteMessageText?: string | null;
     },
   ) {
-    return this.messageService.createMessage(
+    return this.messageService.createTextMessage(
       chatId,
       user.userId,
       body.text,
       body.quoteMessageId,
       body.quoteMessageText,
+    );
+  }
+
+  @Post('chat/:chatId/messages/poll')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        question: { type: 'string' },
+        options: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  })
+  createPollMessage(
+    @CurrentUser() user: { userId: string },
+    @Param('chatId') chatId: string,
+    @Body()
+    body: {
+      question: string;
+      options: string[];
+    },
+  ) {
+    return this.messageService.createPollMessage(
+      chatId,
+      user.userId,
+      body.question,
+      body.options,
+    );
+  }
+
+  @Post('chat/:chatId/messages/:messageId/vote')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        option: { type: 'string' },
+      },
+      required: ['option'],
+    },
+  })
+  votePollMessage(
+    @CurrentUser() user: { userId: string },
+    @Param('chatId') chatId: string,
+    @Param('messageId') messageId: string,
+    @Body() body: { option: string },
+  ) {
+    return this.messageService.votePollMessage(
+      chatId,
+      messageId,
+      user.userId,
+      body.option,
     );
   }
 

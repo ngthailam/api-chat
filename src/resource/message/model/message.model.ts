@@ -1,17 +1,27 @@
 import { MessageEntity } from '../entities/message.entity.js';
-import { mapReactionsToModel, Reaction } from './reaction.model.js';
+import { MessageType } from './message-type.js';
+import {
+  mapPollMessageEntityToModel,
+  PollMessage,
+} from './poll/message-poll.model.js';
+import { Reaction } from './reaction.model.js';
+import {
+  mapTextMessageEntityToModel,
+  TextMessage,
+} from './text/message-text.model.js';
 
-export class Message {
-  message: MessageBasicInfo;
+export type Message = TextMessage | PollMessage;
+///
+export interface BaseMessage {
+  info: MessageBasicInfo;
   reaction: Reaction;
   quote?: MessageQuote;
 }
 
 export class MessageBasicInfo {
   id: string;
-  text: string;
-  senderId: string;
   chatId: string;
+  senderId: string;
   createdAt: Date;
 }
 
@@ -21,21 +31,31 @@ export class MessageQuote {
   text: string;
 }
 
-export function mapMessageModel(message: MessageEntity): Message {
+export function mapMessageEntityToModel(message: MessageEntity): Message {
+  switch (message.type) {
+    case MessageType.TEXT:
+      return mapTextMessageEntityToModel(message);
+    case MessageType.POLL:
+      return mapPollMessageEntityToModel(message);
+    default:
+      throw new Error(`Unsupported message type: ${message.type}`);
+  }
+}
+
+export function mapMessageInfoEntityToModel(
+  message: MessageEntity,
+): MessageBasicInfo {
   return {
-    message: {
-      id: message.id,
-      text: message.text,
-      senderId: message.senderId,
-      chatId: message.chatId,
-      createdAt: message.createdAt,
-    },
-    reaction: mapReactionsToModel(message.reactions),
-    quote: mapQuoteToModel(message),
+    id: message.id,
+    senderId: message.senderId,
+    chatId: message.chatId,
+    createdAt: message.createdAt,
   };
 }
 
-function mapQuoteToModel(message: MessageEntity): MessageQuote | null {
+export function mapQuoteEntityToModel(
+  message: MessageEntity,
+): MessageQuote | null {
   if (!message.quoteMessageId) {
     return null;
   }

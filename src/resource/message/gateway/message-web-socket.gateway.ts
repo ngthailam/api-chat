@@ -51,7 +51,7 @@ export class MessageWebSocketGateway {
     }
 
     try {
-      const result: MessageEntity = await this.messageService.createMessage(
+      const result: MessageEntity = await this.messageService.createTextMessage(
         chatId,
         senderId,
         text,

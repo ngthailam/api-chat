@@ -53,7 +53,17 @@ export const CustomErrors = {
     message: 'You are not the sender of this message',
     status: HttpStatus.BAD_REQUEST,
   },
-  
+  MSG_NOT_POLL: {
+    code: 103003,
+    message: 'Message is not a poll',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  MSG_POLL_OPTION_NOT_EXIST: {
+    code: 103004,
+    message: 'Poll option does not exist',
+    status: HttpStatus.BAD_REQUEST,
+  },
+
   // Friend
   FRIEND_NOT_EXIST: {
     code: 104001,

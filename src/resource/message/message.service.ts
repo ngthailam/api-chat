@@ -13,8 +13,10 @@ import { ChatMemberEntity } from '../chat/entities/chat-member.entity.js';
 import { CustomException } from '../../common/errors/exception/custom.exception.js';
 import { CustomErrors } from '../../common/errors/error_codes.js';
 import { UpdateMessageDto } from './dto/update-message.dto.js';
-import { mapMessageModel, Message } from './model/message.model.js';
-import { MessageListModel } from './model/message-list.model.js';
+import { mapMessageEntityToModel, Message } from './model/message.model.js';
+import { MessageList } from './model/message-list.model.js';
+import { MessageType } from './model/message-type.js';
+import { MessageEntityPollExtraData } from './entities/message-poll-extra-data.entity.js';
 
 @Injectable()
 export class MessageService {
@@ -33,7 +35,7 @@ export class MessageService {
 
   async findAll(): Promise<Message[]> {
     const messages = await this.messageRepo.find();
-    return messages.map((e) => mapMessageModel(e));
+    return messages.map((e) => mapMessageEntityToModel(e));
   }
 
   private async findMessagesByCursor(
@@ -42,7 +44,7 @@ export class MessageService {
     limit: number,
     direction: 'older' | 'newer',
     cursor?: string,
-  ): Promise<MessageListModel> {
+  ): Promise<MessageList> {
     await this.ensureChatMember(userId, chatId);
 
     const where: FindOptionsWhere<MessageEntity> = { chatId };
@@ -67,7 +69,7 @@ export class MessageService {
     const nextCursor = hasMore ? messages[messages.length - 1].id : null;
 
     return {
-      messages: sliced.map(mapMessageModel),
+      messages: sliced.map(mapMessageEntityToModel),
       hasMore,
       nextCursor: nextCursor,
       total: sliced.length,
@@ -79,7 +81,7 @@ export class MessageService {
     chatId: string,
     limit: number,
     cursor?: string,
-  ): Promise<MessageListModel> {
+  ): Promise<MessageList> {
     return this.findMessagesByCursor(userId, chatId, limit, 'older', cursor);
   }
 
@@ -88,7 +90,7 @@ export class MessageService {
     chatId: string,
     limit: number,
     cursor?: string,
-  ): Promise<MessageListModel> {
+  ): Promise<MessageList> {
     return this.findMessagesByCursor(userId, chatId, limit, 'newer', cursor);
   }
 
@@ -97,9 +99,9 @@ export class MessageService {
     chatId: string,
     messageId: string,
     limit?: number,
-  ): Promise<MessageListModel> {
+  ): Promise<MessageList> {
     // 1️⃣ Ensure user is member (keep your existing check)
-    this.ensureChatMember(userId, chatId); // throws if not member
+    await this.ensureChatMember(userId, chatId); // throws if not member
 
     const anchorId = messageId;
     const safeLimit =
@@ -153,7 +155,7 @@ export class MessageService {
 
     // TODO: add has more, next cursor info if needed
     return {
-      messages: fullMessageList.map(mapMessageModel),
+      messages: fullMessageList.map(mapMessageEntityToModel),
       hasMore,
       nextCursor: nextCursor,
       total: fullMessageList.length,
@@ -173,24 +175,101 @@ export class MessageService {
     return this.messageRepo.delete(messageId);
   }
 
-  async createMessage(
+  async createTextMessage(
     chatId: string,
     senderId: string,
     text: string,
     quoteMessageId?: string | null,
     quoteMessageText?: string | null,
   ): Promise<MessageEntity> {
-    this.ensureChatMember(senderId, chatId); // throws if not member
+    await this.ensureChatMember(senderId, chatId); // throws if not member
 
     const message = this.messageRepo.create({
       text,
       senderId,
       chatId,
       createdAt: new Date(),
+      type: MessageType.TEXT,
       quoteMessageId: quoteMessageId,
       quoteMessageText: quoteMessageText,
     });
     return this.messageRepo.save(message);
+  }
+
+  async createPollMessage(
+    chatId: string,
+    senderId: string,
+    question: string,
+    options: string[],
+  ): Promise<Message> {
+    await this.ensureChatMember(senderId, chatId); // throws if not member
+
+    const pollExtraData = new MessageEntityPollExtraData();
+    pollExtraData.question = question;
+    pollExtraData.options = options
+      .filter((option) => option && option.trim() !== '')
+      .map((option) => {
+        return {
+          option: option,
+          voters: [],
+        };
+      });
+
+    const message = this.messageRepo.create({
+      text: '',
+      senderId,
+      chatId,
+      createdAt: new Date(),
+      type: MessageType.POLL,
+      extraData: pollExtraData,
+    });
+    const entity = await this.messageRepo.save(message);
+    return mapMessageEntityToModel(entity);
+  }
+
+  async votePollMessage(
+    chatId: string,
+    messageId: string,
+    userId: string,
+    option: string,
+  ) {
+    await this.ensureChatMember(userId, chatId); // throws if not member
+
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId, chatId },
+    });
+
+    if (!message || message.type !== MessageType.POLL) {
+      throw new CustomException(CustomErrors.MSG_NOT_POLL);
+    }
+
+    const pollExtraData = message.extraData as MessageEntityPollExtraData;
+    const optionIndex = pollExtraData.options.findIndex(
+      (opt) => opt.option === option,
+    );
+
+    if (optionIndex === -1) {
+      throw new CustomException(CustomErrors.MSG_POLL_OPTION_NOT_EXIST);
+    }
+
+    pollExtraData.options.forEach((opt) => {
+      const existingVoterIndex = opt.voters.findIndex((v) => v.id === userId);
+      if (existingVoterIndex !== -1) {
+        // If already voted, remove the vote
+        opt.voters.splice(existingVoterIndex, 1);
+      }
+    });
+
+    // Add new voter
+    pollExtraData.options[optionIndex].voters.push({
+      id: userId,
+      username: '', // TODO: fill this
+      avatarUrl: '', // TODO: fill this
+    });
+
+    message.extraData = pollExtraData;
+    const entity = await this.messageRepo.save(message);
+    return mapMessageEntityToModel(entity);
   }
 
   async update(
@@ -217,7 +296,7 @@ export class MessageService {
       await this.messageRepo.save(message);
     }
 
-    return mapMessageModel(message);
+    return mapMessageEntityToModel(message);
   }
 
   async searchInChat(
@@ -225,7 +304,7 @@ export class MessageService {
     chatId: string,
     keyword: string,
   ): Promise<MessageEntity[]> {
-    this.ensureChatMember(userId, chatId); // throws if not member
+    await this.ensureChatMember(userId, chatId); // throws if not member
 
     return this.messageRepo
       .createQueryBuilder('m')

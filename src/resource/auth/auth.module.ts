@@ -5,8 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { configConstants } from '../../common/constants/config.constants.js';
 import { JwtStrategy } from '../../common/strategy/jwt.strategy.js';
-import { UserEntity } from '../../user/entities/user.entity.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '../user/entities/user.entity.js';
 
 @Module({
   imports: [
