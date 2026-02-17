@@ -1,8 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FriendEntity } from './entities/friend.entities.js';
+import { FriendEntity } from './entities/friend.entity.js';
 import { Repository } from 'typeorm';
 import { normalizeUserPair } from '../common/utils/misc.js';
+import { Friend, mapFriendEntityToModel } from './model/friend.model.js';
+import { CustomException } from '../common/errors/exception/custom.exception.js';
+import { CustomErrors } from '../common/errors/error_codes.js';
 
 @Injectable()
 export class FriendService {
@@ -20,21 +23,26 @@ export class FriendService {
       },
     });
 
-    return this.friendRepo.remove(friend);
+    if (!friend) {
+      throw new CustomException(CustomErrors.FRIEND_NOT_EXIST);
+    }
+
+    await this.friendRepo.remove(friend);
   }
 
-  create(senderId: string, receiverId: string) {
+  async create(senderId: string, receiverId: string): Promise<Friend> {
     const { user1Id, user2Id } = normalizeUserPair(senderId, receiverId);
 
     const friend = new FriendEntity();
     friend.user1Id = user1Id;
     friend.user2Id = user2Id;
 
-    return this.friendRepo.save(friend);
+    const savedFriend = await this.friendRepo.save(friend);
+    return mapFriendEntityToModel(savedFriend);
   }
 
-  findAllUserFriends(userId: string) {
-    return this.friendRepo.find({
+  async findAllUserFriends(userId: string): Promise<Friend[]> {
+    const friends = await this.friendRepo.find({
       where: [
         {
           user1Id: userId,
@@ -44,5 +52,7 @@ export class FriendService {
         },
       ],
     });
+
+    return friends.map((friend) => mapFriendEntityToModel(friend));
   }
 }

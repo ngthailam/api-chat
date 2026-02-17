@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity.js';
 import { ILike, Repository } from 'typeorm';
 import { UserWithFriendStatus } from './model/user-with-friend-status.model.js';
-import { FriendEntity } from '../friend/entities/friend.entities.js';
+import { FriendEntity } from '../friend/entities/friend.entity.js';
 import { normalizeUserPair } from '../common/utils/misc.js';
 
 @Injectable()

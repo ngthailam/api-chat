@@ -53,6 +53,13 @@ export const CustomErrors = {
     message: 'You are not the sender of this message',
     status: HttpStatus.BAD_REQUEST,
   },
+  
+  // Friend
+  FRIEND_NOT_EXIST: {
+    code: 104001,
+    message: 'Friend does not exist',
+    status: HttpStatus.BAD_REQUEST,
+  },
 };
 
 export type CustomError = (typeof CustomErrors)[keyof typeof CustomErrors];

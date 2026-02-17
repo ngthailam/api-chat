@@ -4,7 +4,7 @@ import { UserController } from './user.controller.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity.js';
 import { ChatEntity } from '../chat/entities/chat.entity.js';
-import { FriendEntity } from '../friend/entities/friend.entities.js';
+import { FriendEntity } from '../friend/entities/friend.entity.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, ChatEntity, FriendEntity])],

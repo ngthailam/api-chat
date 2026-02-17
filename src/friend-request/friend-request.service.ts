@@ -80,7 +80,7 @@ export class FriendRequestService {
     const savedRequest = await this.friendRequestRepo.save(request);
 
     // Create a friend relationship
-    this.friendService.create(request.senderId, request.receiverId);
+    await this.friendService.create(request.senderId, request.receiverId);
 
     return savedRequest;
   }
