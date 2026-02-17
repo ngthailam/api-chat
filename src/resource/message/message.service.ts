@@ -17,6 +17,8 @@ import { mapMessageEntityToModel, Message } from './model/message.model.js';
 import { MessageList } from './model/message-list.model.js';
 import { MessageType } from './model/message-type.js';
 import { MessageEntityPollExtraData } from './entities/message-poll-extra-data.entity.js';
+import { timeConstants } from '../../common/constants/time.constants.js';
+import { pollMessageExpireQueue } from '../../queue/poll-message/poll-message-expire.queue.js';
 
 @Injectable()
 export class MessageService {
@@ -206,6 +208,8 @@ export class MessageService {
 
     const pollExtraData = new MessageEntityPollExtraData();
     pollExtraData.question = question;
+    pollExtraData.expireAt = new Date(Date.now() + timeConstants.tenSeconds);
+    pollExtraData.isExpired = false;
     pollExtraData.options = options
       .filter((option) => option && option.trim() !== '')
       .map((option) => {
@@ -224,6 +228,18 @@ export class MessageService {
       extraData: pollExtraData,
     });
     const entity = await this.messageRepo.save(message);
+
+    console.log(`Scheduled poll expiration for message ${entity.id} at ${pollExtraData.expireAt.toISOString()}`);
+    await pollMessageExpireQueue.add(
+      'expire-poll',
+      { messageId: entity.id },
+      {
+        delay: timeConstants.tenSeconds,
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    );
+
     return mapMessageEntityToModel(entity);
   }
 
@@ -244,6 +260,10 @@ export class MessageService {
     }
 
     const pollExtraData = message.extraData as MessageEntityPollExtraData;
+
+    if (pollExtraData.isExpired) {  
+      throw new CustomException(CustomErrors.MSG_POLL_EXPIRED);
+    }
     const optionIndex = pollExtraData.options.findIndex(
       (opt) => opt.option === option,
     );

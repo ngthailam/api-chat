@@ -12,6 +12,8 @@ export interface PollMessage extends BaseMessage {
   type: MessageType.POLL;
   question: string;
   options: PollMessageOption[];
+  expireAt?: Date;
+  isExpired: boolean;
 }
 
 export class PollMessageOption {
@@ -31,6 +33,8 @@ export function mapPollMessageEntityToModel(
       option: opt.option,
       voters: opt.voters,
     })),
+    expireAt: extraData.expireAt,
+    isExpired: extraData.isExpired ? extraData.isExpired : false,
     info: mapMessageInfoEntityToModel(message),
     reaction: mapReactionsEntityToModel(message.reactions),
     quote: mapQuoteEntityToModel(message),

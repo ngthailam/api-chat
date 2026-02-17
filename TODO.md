@@ -25,7 +25,7 @@
 [x] Security (Helmet, CORS, CRSF, https://docs.nestjs.com/security/csrf)
 [x] Performance (Fastify ?) -> No need, this is just simple CRUD app
 [] Race condition handling
-[] Task scheduling (try accesing the database and/or notification)
+[x] Task scheduling (try accesing the database and/or notification)
 [x] Add paging to some APIs (get user by name, get chats, get messages in chat)
 [] Add version control (v1 v2 ?)
 [] CI/CD Auto deploy/host somewhere

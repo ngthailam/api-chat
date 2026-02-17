@@ -15,6 +15,8 @@ export interface PollMessageResponse extends BaseMessageResponse {
     option: string;
     voters: { id: string; username: string; avatarUrl: string }[];
   }[];
+  expireAt?: Date;
+  isExpired: boolean;
 }
 export function mapPollMessageModelToResponse(
   model: Message,
@@ -25,6 +27,8 @@ export function mapPollMessageModelToResponse(
     type: MessageType.POLL,
     question: message.question,
     options: message.options,
+    expireAt: message.expireAt,
+    isExpired: message.isExpired ?? false,
     info: mapMessageInfoModelToRespone(message.info),
     reaction: mapReactionsModelToResponse(message.reaction),
     quote: mapQuoteModelToResponse(message.quote),

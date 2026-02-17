@@ -63,6 +63,11 @@ export const CustomErrors = {
     message: 'Poll option does not exist',
     status: HttpStatus.BAD_REQUEST,
   },
+  MSG_POLL_EXPIRED: {
+    code: 103005,
+    message: 'Poll has expired',
+    status: HttpStatus.BAD_REQUEST,
+  },
 
   // Friend
   FRIEND_NOT_EXIST: {
