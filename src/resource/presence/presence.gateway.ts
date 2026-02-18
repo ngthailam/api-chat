@@ -17,7 +17,11 @@ import { WsDeviceIdDecorator } from '../../common/decorator/ws-device-id.decorat
  * - handle user connections and disconnections
  * - broadcast presence updates
  */
-@WebSocketGateway(80)
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class PresenceGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;

@@ -29,7 +29,9 @@ class WebSocketService {
         : 'http';
 
     final String wsUrl =
-        '$protocol://$baseUrl${namespace.isNotEmpty ? '/$namespace' : ''}';
+        ApiConstants.environment == ApiConstants.production
+            ? 'https://api-chat-ssve.onrender.com'
+            : '$protocol://$baseUrl${namespace.isNotEmpty ? '/$namespace' : ''}';
 
     if (kDebugMode) {
       print('Connecting to WebSocket: $wsUrl');

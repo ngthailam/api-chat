@@ -22,7 +22,11 @@ import { mapMessageModelToResponse } from '../response/message.response.js';
  * - sending messages
  * -
  */
-@WebSocketGateway(80)
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class MessageWebSocketGateway {
   @WebSocketServer()
   private server: Server;
