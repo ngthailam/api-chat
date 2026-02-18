@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
-import { redisConnection } from '../redis.config.js';
+import { createRedisOptions } from '../redis.config.js';
 
 export const pollMessageExpireQueue = new Queue('poll-expiration', {
-  connection: redisConnection,
+  connection: createRedisOptions(),
 });

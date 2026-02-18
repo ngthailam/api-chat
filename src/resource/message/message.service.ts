@@ -208,7 +208,7 @@ export class MessageService {
 
     const pollExtraData = new MessageEntityPollExtraData();
     pollExtraData.question = question;
-    pollExtraData.expireAt = new Date(Date.now() + timeConstants.tenSeconds);
+    pollExtraData.expireAt = new Date(Date.now() + timeConstants.fiveMinutes);
     pollExtraData.isExpired = false;
     pollExtraData.options = options
       .filter((option) => option && option.trim() !== '')
@@ -234,7 +234,7 @@ export class MessageService {
       'expire-poll',
       { messageId: entity.id },
       {
-        delay: timeConstants.tenSeconds,
+        delay: timeConstants.fiveMinutes,
         removeOnComplete: true,
         removeOnFail: false,
       },

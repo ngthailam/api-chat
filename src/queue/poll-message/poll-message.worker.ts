@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { redisConnection } from '../redis.config.js';
+import { createRedisOptions } from '../redis.config.js';
 import { AppDataSource } from '../../common/database/typeorm.config.js';
 import { MessageEntity } from '../../resource/message/entities/message.entity.js';
 import { MessageType } from '../../resource/message/model/message-type.js';
@@ -30,6 +30,6 @@ new Worker(
     );
   },
   {
-    connection: redisConnection,
+    connection: createRedisOptions(),
   },
 );

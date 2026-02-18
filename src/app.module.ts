@@ -49,5 +49,3 @@ import { UserModule } from './resource/user/user.module.js';
   ],
 })
 export class AppModule {}
-
-console.log(process.env.DATABASE_NAME);

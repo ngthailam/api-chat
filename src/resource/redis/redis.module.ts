@@ -1,5 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { createRedisOptions } from '../../queue/redis.config.js';
 
 @Global()
 @Module({
@@ -7,11 +8,7 @@ import { Redis } from 'ioredis';
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
-        return new Redis({
-          host: 'localhost',
-          port: 6379,
-          retryStrategy: (times) => Math.min(times * 50, 2000),
-        });
+        return new Redis(createRedisOptions());
       },
     },
   ],
