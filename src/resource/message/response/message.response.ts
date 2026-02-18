@@ -66,6 +66,13 @@ export function mapMessageInfoModelToRespone(
 export function mapReactionsModelToResponse(
   reaction: Reaction,
 ): MessageReactionResponse {
+  if (!reaction) {
+    return {
+      count: {} as Record<ReactionType, number>,
+      sender: {} as Record<string, ReactionType>,
+    };
+  } 
+
   return {
     count: reaction.count,
     sender: reaction.sender,
@@ -75,6 +82,10 @@ export function mapReactionsModelToResponse(
 export function mapQuoteModelToResponse(
   quote: MessageQuote,
 ): MessageQuoteResponse | null {
+  if (!quote) {
+    return null;
+  }
+
   if (!quote.messageId) {
     return null;
   }

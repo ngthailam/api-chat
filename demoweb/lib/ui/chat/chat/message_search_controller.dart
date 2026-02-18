@@ -51,7 +51,7 @@ class MessageSearchController extends GetxController {
         chatId.value,
         keyword,
       );
-      searchResults.value = results;
+      searchResults.value = results.messages;
     } catch (e) {
       if (kDebugMode) {
         print('Error searching messages: $e');

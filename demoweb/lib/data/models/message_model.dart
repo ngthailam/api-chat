@@ -3,25 +3,23 @@ import 'package:json_annotation/json_annotation.dart';
 part 'message_model.g.dart';
 
 @JsonSerializable()
-class MessageModel {
-  final int id;
+class MessageInfoModel {
+  final String id;
   final String chatId;
   final String senderId;
-  final String text;
   final DateTime createdAt;
 
-  MessageModel({
+  MessageInfoModel({
     required this.id,
     required this.chatId,
     required this.senderId,
-    required this.text,
     required this.createdAt,
   });
 
-  factory MessageModel.fromJson(Map<String, dynamic> json) =>
-      _$MessageModelFromJson(json);
+  factory MessageInfoModel.fromJson(Map<String, dynamic> json) =>
+      _$MessageInfoModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$MessageModelToJson(this);
+  Map<String, dynamic> toJson() => _$MessageInfoModelToJson(this);
 }
 
 @JsonSerializable()

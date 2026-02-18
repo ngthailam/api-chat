@@ -24,7 +24,7 @@ class ChatListController extends GetxController {
     final users = <String>{};
     for (var e in result) {
       for (var member in e.members) {
-        users.add(member.id);
+        users.add(member.id.toString());
       }
     }
 

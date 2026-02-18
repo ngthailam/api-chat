@@ -12,6 +12,7 @@ An backend API for a chat system.
 ## Commands
 
 ### Database commands
+
 psql
 \l
 \c api_chat
@@ -31,7 +32,7 @@ brew services start redis
 ### Flutter commands
 
 /Volumes/Transcend/Code/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
-
+/Volumes/Transcend/Code/flutter/bin/flutter run -d chrome --dart-define=ENVIRONMENT=development
 ### Run specific test
 
 npm test -- --"friend-request.service.spec.ts" --verbose
@@ -48,11 +49,13 @@ test:cov
 ### Migration:
 
 ## Create migration
+
 npx typeorm migration:create src/common/database/migrations/update-table-name-messages
 
 ## Run migration
-node ./node_modules/typeorm/cli.js \
-  -d dist/common/database/typeorm.config.js \
+
+node ./node_modules/typeorm/cli.js 
+  -d dist/common/database/typeorm.config.js 
   migration:run
 
 node ./node_modules/typeorm/cli.js -d dist/common/database/typeorm.config.js migration:run

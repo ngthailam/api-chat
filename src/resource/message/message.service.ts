@@ -182,7 +182,7 @@ export class MessageService {
     text: string,
     quoteMessageId?: string | null,
     quoteMessageText?: string | null,
-  ): Promise<MessageEntity> {
+  ): Promise<Message> {
     await this.ensureChatMember(senderId, chatId); // throws if not member
 
     const message = this.messageRepo.create({
@@ -194,7 +194,8 @@ export class MessageService {
       quoteMessageId: quoteMessageId,
       quoteMessageText: quoteMessageText,
     });
-    return this.messageRepo.save(message);
+    const entity = await this.messageRepo.save(message);
+    return mapMessageEntityToModel(entity);
   }
 
   async createPollMessage(

@@ -11,9 +11,7 @@ part of 'api_service.dart';
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
 class _ApiService implements ApiService {
-  _ApiService(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://127.0.0.1:3000';
-  }
+  _ApiService(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -189,14 +187,12 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<List<ChatMessageResponseItem>> getAllMessageInChat(
-    String chatId,
-  ) async {
+  Future<ChatMessagesResponse> getAllMessageInChat(String chatId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<ChatMessageResponseItem>>(
+    final _options = _setStreamType<ChatMessagesResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -206,15 +202,10 @@ class _ApiService implements ApiService {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<ChatMessageResponseItem> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChatMessagesResponse _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                ChatMessageResponseItem.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = ChatMessagesResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -223,7 +214,7 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<List<ChatMessageResponseItem>> searchMessageInChat(
+  Future<ChatMessagesResponse> searchMessageInChat(
     String chatId,
     String keyword,
   ) async {
@@ -231,7 +222,7 @@ class _ApiService implements ApiService {
     final queryParameters = <String, dynamic>{r'keyword': keyword};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<ChatMessageResponseItem>>(
+    final _options = _setStreamType<ChatMessagesResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -241,15 +232,10 @@ class _ApiService implements ApiService {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<ChatMessageResponseItem> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChatMessagesResponse _value;
     try {
-      _value = _result.data!
-          .map(
-            (dynamic i) =>
-                ChatMessageResponseItem.fromJson(i as Map<String, dynamic>),
-          )
-          .toList();
+      _value = ChatMessagesResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

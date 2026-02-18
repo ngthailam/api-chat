@@ -23,7 +23,7 @@ class ChatModel {
 @JsonSerializable()
 class ChatMemberModel {
   final String id;
-  final String email;
+  final String? email;
   final String? nickName;
   final String role;
 

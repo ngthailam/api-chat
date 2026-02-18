@@ -23,7 +23,7 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
 ChatMemberModel _$ChatMemberModelFromJson(Map<String, dynamic> json) =>
     ChatMemberModel(
       id: json['id'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       nickName: json['nickName'] as String?,
       role: json['role'] as String,
     );

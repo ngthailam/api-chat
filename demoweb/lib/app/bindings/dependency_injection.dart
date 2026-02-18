@@ -13,7 +13,7 @@ import 'package:demoweb/ui/chat/search_chat/search_chat_controller.dart';
 
 class DependencyInjection {
   static void init() {
-    // Dio
+    // Dio - using environment-based baseUrl
     final dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -33,13 +33,17 @@ class DependencyInjection {
 
     Get.put(dio);
 
-    // ApiService - Single unified service for all REST API calls
+    // ApiService - using environment-based baseUrl
     Get.put<ApiService>(
       ApiService(Get.find<Dio>(), baseUrl: ApiConstants.baseUrl),
     );
 
-    // WebSocket Service
-    Get.put(WebSocketService(port: '80', namespace: ''));
+    // WebSocket Service - using environment-based port
+    // For production, use port 443 (HTTPS), for development use port 80 (HTTP)
+    final wsPort = ApiConstants.environment == ApiConstants.production
+        ? '443'
+        : '80';
+    Get.put(WebSocketService(port: wsPort, namespace: ''));
 
     // Presence Service (singleton for both ChatList and Chat pages)
     final presenceService = PresenceService();

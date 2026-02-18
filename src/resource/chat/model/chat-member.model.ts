@@ -1,7 +1,7 @@
 import { ChatMemberEntity } from '../entities/chat-member.entity.js';
 
 export class ChatMember {
-  id: number;
+  id: string;
 
   nickName?: string;
 
@@ -11,8 +11,9 @@ export class ChatMember {
 export function mapChatMemberEntityToModel(
   chatMemberEntity: ChatMemberEntity,
 ): ChatMember {
+  console.log(`Mapping chat member entity ${JSON.stringify(chatMemberEntity)} to model`);
   return {
-    id: chatMemberEntity.id,
+    id: chatMemberEntity.member.id,
     nickName: chatMemberEntity.nickName,
     role: chatMemberEntity.role,
   };

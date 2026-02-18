@@ -1,7 +1,7 @@
 import { ChatMember } from '../model/chat-member.model.js';
 
 export class ChatMemberDto {
-  id: number;
+  id: string;
 
   nickName?: string;
 

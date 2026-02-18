@@ -9,10 +9,13 @@ export class ChatDto {
   members: ChatMemberDto[];
 }
 
-export function mapChatModelToDto(chat: Chat): ChatDto {
+export function mapChatModelToDto(chat?: Chat | null): ChatDto | null {
+  if (!chat) return null;
+
   const dto = new ChatDto();
   dto.id = chat.id;
   dto.name = chat.name;
-  dto.members = chat.members.map((cm) => mapChatMemberModelToDto(cm));
+  dto.members = (chat.members ?? []).map((cm) => mapChatMemberModelToDto(cm));
+
   return dto;
 }

@@ -18,7 +18,7 @@ export class MessageEntity {
 
   @Column()
   text: string;
-
+  
   // 👇 DO NOT try to set this in app code
   @Column({
     type: 'tsvector',

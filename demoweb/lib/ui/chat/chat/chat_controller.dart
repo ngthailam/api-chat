@@ -15,7 +15,6 @@ class ChatController extends GetxController {
 
   final chatId = ''.obs;
   final messages = <ChatMessageResponseItem>[].obs;
-  final messageController = TextEditingController();
   final isLoading = false.obs;
   final isCreatingChat = false.obs;
 
@@ -31,7 +30,7 @@ class ChatController extends GetxController {
     try {
       // Try to load messages from the chat
       final result = await apiService.getAllMessageInChat(chatId.value);
-      messages.value = result;
+      messages.value = result.messages;
     } catch (e) {
       if (kDebugMode) {
         print('Error loading messages: $e');
@@ -42,8 +41,8 @@ class ChatController extends GetxController {
   }
 
   // Send a message
-  Future<void> sendMessage() async {
-    final content = messageController.text.trim();
+  Future<void> sendMessage({required String text}) async {
+    final content = text.trim();
     if (content.isEmpty || chatId.value.isEmpty) return;
 
     try {
@@ -52,8 +51,6 @@ class ChatController extends GetxController {
         'text': content,
         'chatId': chatId.value,
       });
-
-      messageController.clear();
     } catch (e) {
       if (kDebugMode) {
         print('Error sending message: $e');
@@ -90,10 +87,16 @@ class ChatController extends GetxController {
       webSocketService.emit('join-chat', {'chatId': chatId.value});
 
       webSocketService.on('new-message', (data) {
-        final message = MessageModel.fromJson(data);
-        messages.add(
-          ChatMessageResponseItem(message: message, reaction: ReactionModel()),
-        );
+        print("ZZLL data = $data");
+        // TODO: fix this
+        try {
+          final message = ChatMessageResponseItem.fromJson(data);
+          messages.insert(0, message);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error parsing new message: $e');
+          }
+        }
       });
 
       loadMessages();
@@ -111,7 +114,7 @@ class ChatController extends GetxController {
         'type': 'one-one',
       });
       chatId.value = chat.id;
-      _memberIds = chat.members.map((m) => m.id).toList();
+      _memberIds = chat.members.map((m) => m.id.toString()).toList();
 
       // Now connect to WebSocket and load messages
       webSocketService.connect();
@@ -132,7 +135,6 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
-    messageController.dispose();
     disconnectWebSocket();
     super.onClose();
   }

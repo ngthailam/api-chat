@@ -14,6 +14,7 @@ import { CustomException } from '../../common/errors/exception/custom.exception.
 import { CustomErrors } from '../../common/errors/error_codes.js';
 import { Chat, mapChatEntityToModel } from './model/chat.model.js';
 import { UserEntity } from '../user/entities/user.entity.js';
+import { connectNormalizedUserPair, normalizeUserPair } from '../../common/utils/misc.js';
 
 @Injectable()
 export class ChatService {
@@ -34,23 +35,32 @@ export class ChatService {
         throw new CustomException(CustomErrors.CHAT_INVALID_MEM_COUNT);
       }
 
-      const existingChat = await this.findExistingOneToOneChat(
+      const existingChat: Chat = await this.findExistingOneToOneChat(
         userId,
         createChatDto.memberIds.at(0),
       );
       if (existingChat) {
         this.logger.log(`Chat already exist ${existingChat}`);
-        return mapChatEntityToModel(existingChat);
+        return existingChat;
       }
     }
 
     // Creating chat
     const chat: ChatEntity = this.chatRepo.create();
-    if (createChatDto.type != ChatType.ONE_ONE) {
-      chat.name = createChatDto.name;
+    if (createChatDto.type == ChatType.GROUP) {
+      chat.name = createChatDto.name || 'New group chat';
+    }
+    if (createChatDto.type == ChatType.ONE_ONE) {
+      chat.name = null;
+      chat.oneToOneUserIdPair = connectNormalizedUserPair(
+        userId,
+        createChatDto.memberIds.at(0),
+      );
     }
     chat.type = createChatDto.type;
     const savedChat = await this.chatRepo.save(chat);
+
+    console.log(`Chat created with id ${savedChat}`);
 
     // Adding members
     const membersToAdd = createChatDto.memberIds || [];
@@ -59,7 +69,7 @@ export class ChatService {
     }
 
     const members = await this.userRepo.find({
-      where: { id: In(createChatDto.memberIds) },
+      where: { id: In(membersToAdd) },
     });
 
     this.logger.log(
@@ -83,29 +93,25 @@ export class ChatService {
     userAId: string,
     userBId: string,
   ): Promise<Chat | null> {
-    const chatMembers = await this.chatMemberRepo.find({
-      where: { member: { id: userAId } },
-      relations: ['member', 'chat'],
+    const existingChat = await this.chatRepo.findOne({
+      where: {
+        type: ChatType.ONE_ONE,
+        oneToOneUserIdPair: connectNormalizedUserPair(userAId, userBId),
+      },
     });
 
-    let targetChat: ChatEntity | null = null;
+    if (existingChat) {
+      const chatMembers = await this.chatMemberRepo.find({
+        where: { chat: { id: existingChat.id } },
+        relations: ['member'],
+      });
 
-    chatMembers.forEach(async (e) => {
-      const chatId = e.chat.id;
+      console.log(`Found existing one-one chat ${chatMembers} for users ${userAId} and ${userBId}`);
 
-      if (e.chat.type == ChatType.ONE_ONE) {
-        const otherChatMember = await this.chatMemberRepo.findOne({
-          where: { chat: { id: chatId }, member: { id: Not(userAId) } },
-        });
+      return mapChatEntityToModel(existingChat, chatMembers);
+    }
 
-        if (otherChatMember.member.id == userBId) {
-          targetChat = e.chat;
-          return targetChat;
-        }
-      }
-    });
-
-    return mapChatEntityToModel(targetChat);
+    return null;
   }
 
   async findAll(): Promise<Chat[]> {

@@ -13,6 +13,8 @@ import { MessageService } from '../message.service.js';
 import { MessageEntity } from '../entities/message.entity.js';
 import { WsAuthGuard } from '../../../common/guard/ws-auth.guard.js';
 import { WsCurrentUserDecorator } from '../../../common/decorator/ws-current-user.decorator.js';
+import { Message } from '../model/message.model.js';
+import { mapMessageModelToResponse } from '../response/message.response.js';
 
 /**
  * Gateway for:
@@ -42,6 +44,8 @@ export class MessageWebSocketGateway {
     @ConnectedSocket() client: Socket,
     @WsCurrentUserDecorator() user: any,
   ) {
+    console.log(`Received message payload ${JSON.stringify(payload)} from user ${user?.userId} in chat ${client.data.chatId}`);
+
     const { text, quoteMessageId, quoteMessageText } = payload;
     const chatId = client.data.chatId;
     const senderId = user?.userId;
@@ -51,7 +55,7 @@ export class MessageWebSocketGateway {
     }
 
     try {
-      const result: MessageEntity = await this.messageService.createTextMessage(
+      const message: Message = await this.messageService.createTextMessage(
         chatId,
         senderId,
         text,
@@ -59,9 +63,10 @@ export class MessageWebSocketGateway {
         quoteMessageText,
       );
 
-      this.server.to(chatId).emit('new-message', result);
+      const response = mapMessageModelToResponse(message);
+      this.server.to(chatId).emit('new-message', response);
 
-      return result; // returned to sender as ack
+      return response; // returned to sender as ack
     } catch (error: HttpException | any) {
       throw new WsException(error.message || 'Failed to send message');
     }

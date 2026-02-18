@@ -17,6 +17,7 @@ export function mapChatEntityToModel(
   chatEntity: ChatEntity,
   members: ChatMemberEntity[] = null,
 ): Chat {
+  console.log(`Mapping chat entity ${chatEntity} with members ${members} to model`);
   return {
     id: chatEntity.id,
     name: chatEntity.name,

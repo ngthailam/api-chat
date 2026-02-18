@@ -11,4 +11,9 @@ export class ChatEntity {
 
   @Column({ default: ChatType.GROUP })
   type: ChatType;
+
+  // Used to quick check for one-to-one chat without extra query to chat_member table
+  // Format: result of normalizeUserPair
+  @Column({ nullable: true, unique: true })
+  oneToOneUserIdPair?: string;
 }

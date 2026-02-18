@@ -89,21 +89,21 @@ class MessageSearchTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                message.message?.senderId ?? '',
+                message.info?.senderId ?? '',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
               ),
               Text(
-                _formatDate(message.message?.createdAt),
+                _formatDate(message.info?.createdAt),
                 style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            message.message?.text ?? '',
+            message.text ?? '',
             style: const TextStyle(fontSize: 14),
           ),
         ],

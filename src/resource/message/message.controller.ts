@@ -16,6 +16,7 @@ import {
   mapMessageListModelToResponse,
   MessageListResponse,
 } from './response/message-list.response.js';
+import { mapMessageModelToResponse } from './response/message.response.js';
 
 @ApiTags('Message')
 @Controller('message')
@@ -40,7 +41,7 @@ export class MessageController {
       required: ['text'],
     },
   })
-  createTextMessage(
+  async createTextMessage(
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Body()
@@ -50,13 +51,14 @@ export class MessageController {
       quoteMessageText?: string | null;
     },
   ) {
-    return this.messageService.createTextMessage(
+    const model = await this.messageService.createTextMessage(
       chatId,
       user.userId,
       body.text,
       body.quoteMessageId,
       body.quoteMessageText,
     );
+    return mapMessageModelToResponse(model);
   }
 
   @Post('chat/:chatId/messages/poll')
@@ -110,7 +112,7 @@ export class MessageController {
     );
   }
 
-  @Get('chat/:chatId/messages/old')
+  @Get('chat/:chatId/messages')
   @ApiParam({ name: 'chatId', required: true })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -118,12 +120,12 @@ export class MessageController {
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Query('cursor') cursor?: string,
-    @Query('limit') limit: number = 20,
+    @Query('limit') limit?: number,
   ): Promise<MessageListResponse> {
     const model = await this.messageService.findOlderMessagesInChat(
       user.userId,
       chatId,
-      +limit,
+      +limit || 20,
       cursor,
     );
     return mapMessageListModelToResponse(model);
@@ -137,12 +139,12 @@ export class MessageController {
     @CurrentUser() user: { userId: string },
     @Param('chatId') chatId: string,
     @Query('cursor') cursor?: string,
-    @Query('limit') limit: number = 20,
+    @Query('limit') limit?: number,
   ): Promise<MessageListResponse> {
     const model = await this.messageService.findNewerMessagesInChat(
       user.userId,
       chatId,
-      +limit,
+      +limit || 20,
       cursor,
     );
     return mapMessageListModelToResponse(model);

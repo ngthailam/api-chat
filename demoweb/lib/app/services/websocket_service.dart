@@ -1,4 +1,5 @@
 import 'package:demoweb/data/central.dart';
+import 'package:demoweb/utils/constants.dart';
 import 'package:flutter/foundation.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -12,9 +13,30 @@ class WebSocketService {
   WebSocketService({required this.namespace, required this.port});
 
   void connect() {
+    // Get the base URL without http:// or https://
+    String baseUrl;
+    if (ApiConstants.environment == ApiConstants.production) {
+      // For production, extract host from production URL
+      baseUrl = 'api-chat-ssve.onrender.com';
+    } else {
+      // For development, use localhost with the specified port
+      baseUrl = '127.0.0.1:$port';
+    }
+
+    // Determine the protocol based on environment
+    String protocol = ApiConstants.environment == ApiConstants.production
+        ? 'https'
+        : 'http';
+
+    final String wsUrl =
+        '$protocol://$baseUrl${namespace.isNotEmpty ? '/$namespace' : ''}';
+
+    if (kDebugMode) {
+      print('Connecting to WebSocket: $wsUrl');
+    }
+
     socket = IO.io(
-      // ignore: prefer_interpolation_to_compose_strings
-      'http://127.0.0.1:$port' + (namespace.isNotEmpty ? '/$namespace' : ''),
+      wsUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

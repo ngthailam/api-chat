@@ -8,7 +8,7 @@ import 'package:retrofit/retrofit.dart';
 
 part 'api_service.g.dart';
 
-@RestApi(baseUrl: "http://127.0.0.1:3000")
+@RestApi()
 abstract class ApiService {
   factory ApiService(Dio dio, {required String baseUrl}) = _ApiService;
 
@@ -47,12 +47,12 @@ abstract class ApiService {
   // ==================== Message Endpoints ====================
 
   @GET('message/chat/{chatId}/messages')
-  Future<List<ChatMessageResponseItem>> getAllMessageInChat(
+  Future<ChatMessagesResponse> getAllMessageInChat(
     @Path('chatId') String chatId,
   );
 
   @GET('message/chat/{chatId}/messages/search')
-  Future<List<ChatMessageResponseItem>> searchMessageInChat(
+  Future<ChatMessagesResponse> searchMessageInChat(
     @Path('chatId') String chatId,
     @Query('keyword') String keyword,
   );

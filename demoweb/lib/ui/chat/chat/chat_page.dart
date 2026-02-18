@@ -3,8 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'chat_controller.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  final messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +57,17 @@ class ChatPage extends StatelessWidget {
           children: [
             Expanded(
               child: Obx(() {
+                final displayedMessages = controller.messages.value.reversed.toList();
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (controller.messages.isEmpty) {
+                if (displayedMessages.isEmpty) {
                   return const Center(child: Text('No messages yet'));
                 }
                 return ListView.builder(
-                  itemCount: controller.messages.length,
+                  itemCount: displayedMessages.length,
                   itemBuilder: (context, index) {
-                    final message = controller.messages[index];
+                    final message = displayedMessages[index];
                     return MessageTile(
                       message: message,
                       isOwnMessage:
@@ -69,7 +83,7 @@ class ChatPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: controller.messageController,
+                      controller: messageController,
                       decoration: const InputDecoration(
                         hintText: 'Type a message...',
                         border: OutlineInputBorder(),
@@ -78,7 +92,10 @@ class ChatPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    onPressed: () => controller.sendMessage(),
+                    onPressed: () {
+                      controller.sendMessage(text: messageController.text);
+                      messageController.clear();
+                    },
                     icon: const Icon(Icons.send),
                   ),
                 ],
@@ -130,7 +147,7 @@ class MessageTile extends StatelessWidget {
                   ),
                 const SizedBox(width: 4),
                 Text(
-                  message.message?.senderId ?? '',
+                  message.info?.senderId ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -141,7 +158,7 @@ class MessageTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              message.message?.text ?? '',
+              message.text ?? '',
               style: TextStyle(
                 color: isOwnMessage ? Colors.white : Colors.black87,
               ),

@@ -6,20 +6,19 @@ part of 'message_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MessageModel _$MessageModelFromJson(Map<String, dynamic> json) => MessageModel(
-  id: (json['id'] as num).toInt(),
-  chatId: json['chatId'] as String,
-  senderId: json['senderId'] as String,
-  text: json['text'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
+MessageInfoModel _$MessageInfoModelFromJson(Map<String, dynamic> json) =>
+    MessageInfoModel(
+      id: json['id'] as String,
+      chatId: json['chatId'] as String,
+      senderId: json['senderId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
 
-Map<String, dynamic> _$MessageModelToJson(MessageModel instance) =>
+Map<String, dynamic> _$MessageInfoModelToJson(MessageInfoModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'chatId': instance.chatId,
       'senderId': instance.senderId,
-      'text': instance.text,
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
