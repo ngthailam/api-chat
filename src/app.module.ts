@@ -16,6 +16,7 @@ import { PresenceModule } from './resource/presence/presence.module.js';
 import { RedisModule } from './resource/redis/redis.module.js';
 import { typeOrmConfig } from './common/database/typeorm.config.js';
 import { UserModule } from './resource/user/user.module.js';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { UserModule } from './resource/user/user.module.js';
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     PresenceModule,
     RedisModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

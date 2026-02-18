@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { createRedisOptions } from '../../queue/redis.config.js';
+import { createRedisOptions } from '../../redis/redis.config.js';
 
 @Global()
 @Module({

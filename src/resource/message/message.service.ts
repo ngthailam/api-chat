@@ -18,7 +18,6 @@ import { MessageList } from './model/message-list.model.js';
 import { MessageType } from './model/message-type.js';
 import { MessageEntityPollExtraData } from './entities/message-poll-extra-data.entity.js';
 import { timeConstants } from '../../common/constants/time.constants.js';
-import { pollMessageExpireQueue } from '../../queue/poll-message/poll-message-expire.queue.js';
 
 @Injectable()
 export class MessageService {
@@ -228,18 +227,6 @@ export class MessageService {
       extraData: pollExtraData,
     });
     const entity = await this.messageRepo.save(message);
-
-    console.log(`Scheduled poll expiration for message ${entity.id} at ${pollExtraData.expireAt.toISOString()}`);
-    await pollMessageExpireQueue.add(
-      'expire-poll',
-      { messageId: entity.id },
-      {
-        delay: timeConstants.fiveMinutes,
-        removeOnComplete: true,
-        removeOnFail: false,
-      },
-    );
-
     return mapMessageEntityToModel(entity);
   }
 

@@ -7,7 +7,6 @@ import { CatchEverythingFilter } from './common/errors/exception-filters/global.
 import { AppDataSource } from './common/database/typeorm.config.js';
 
 await AppDataSource.initialize();
-import './queue/poll-message/poll-message.worker.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
